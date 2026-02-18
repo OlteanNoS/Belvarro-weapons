@@ -3,62 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <title>FiveM Craft Calculator</title>
-
 <style>
-body{
+body {
     margin:0;
-    font-family:Arial;
-    background:url("background.jpg") no-repeat center center/cover;
+    font-family: Arial;
+    background: url("background.jpg") no-repeat center center/cover;
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
 }
-
-.container{
-    background:rgba(0,0,0,0.85);
-    padding:30px;
-    width:500px;
-    border-radius:10px;
+.container {
+    background: rgba(0,0,0,0.85);
+    padding: 30px;
+    width:600px;
+    border-radius: 10px;
     color:white;
 }
-
-select, input, button{
+select, input, button {
     width:100%;
     padding:8px;
     margin-top:10px;
 }
-
-button{
+button {
     cursor:pointer;
     background:#2ecc71;
     border:none;
     color:white;
     font-weight:bold;
 }
-
-.result{
+.result {
     margin-top:20px;
     padding:15px;
     background:#111;
     border-radius:8px;
 }
+h3 {margin:10px 0 5px 0;}
+label{display:block; margin:5px 0;}
 </style>
 </head>
-
 <body>
-
 <div class="container">
-
 <h3>Ce vrei sa craftezi?</h3>
 <select id="weaponSelect">
 <option value="">-- Selecteaza arma --</option>
-<option value="tec9">Machine Pistol (Tec9)</option>
-<option value="navy">Navy Pistol</option>
 </select>
 
 <div id="bulletsSection" style="display:none;">
-<h3>Cate gloante vrei?</h3>
+<h3>Câte gloante vrei?</h3>
 <select id="bullets">
 <option value="100">100</option>
 <option value="200">200</option>
@@ -66,7 +58,12 @@ button{
 <option value="300">300</option>
 <option value="400">400</option>
 <option value="500">500</option>
+<option value="600">600</option>
+<option value="700">700</option>
+<option value="800">800</option>
+<option value="900">900</option>
 <option value="1000">1000</option>
+<option value="1500">1500</option>
 <option value="2000">2000</option>
 </select>
 </div>
@@ -78,81 +75,192 @@ button{
 </div>
 
 <div id="quantitySection" style="display:none;">
-<h3>Cate arme vrei?</h3>
+<h3>Câte arme vrei?</h3>
 <input type="number" id="weaponQty" min="1" value="1">
 </div>
 
 <button onclick="calculate()">Calculeaza</button>
 
 <div id="result" class="result" style="display:none;"></div>
-
 </div>
 
 <script>
-
+// ==================================
+// STRUCTURA ARME
+// ==================================
 const weapons = {
-    tec9:{
+    "PISTOL":{
         type:"craft",
-        materials:{steel:12, screw:100, barrel:0, spring:1, wood:0, polymer:38},
-        bullets:{100:{powder:150, price:8000}},
+        materials:{steel:8, screw:80, barrel:0, spring:1, wood:0, polymer:20},
+        bullets:{100:{powder:100, price:5400},200:{powder:200, price:10666},250:{powder:250, price:13333}},
         attachments:{
-            incarcator:{steel:2, screw:8, spring:1, polymer:2},
-            amortizor:{steel:2, screw:5, polymer:2}
+            lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+            amortizor:{steel:2,screw:5,polymer:2},
+            incarcator:{steel:1,screw:5,arc:1,polymer:1}
         }
     },
-    navy:{
+    "COMBAT PISTOL":{
+        type:"craft",
+        materials:{steel:8, screw:85, barrel:0, spring:0, wood:0, polymer:18},
+        bullets:{100:{powder:100, price:5400},200:{powder:200, price:10700},250:{powder:250, price:13400}},
+        attachments:{
+            lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+            amortizor:{steel:2,screw:5,polymer:2},
+            incarcator:{steel:1,screw:5,arc:1,polymer:1}
+        }
+    },
+    "PISTOL MK2":{
+        type:"craft",
+        materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
+        bullets:{100:{powder:130,price:7000},200:{powder:260,price:13900},250:{powder:325,price:17400}},
+        attachments:{
+            incarcator:{steel:1,screw:5,arc:1,polymer:1},
+            mounted_scope:{steel:2,screw:10,polymer:2,bec:0,lupa:1},
+            amortizor:{steel:2,screw:5,polymer:2},
+            lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}
+        }
+    },
+    "CERAMIC PISTOL":{
+        type:"craft",
+        materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:18},
+        bullets:{100:{powder:130,price:7000},200:{powder:260,price:13900},250:{powder:325,price:17400}},
+        attachments:{
+            amortizor:{steel:2,screw:5,polymer:2},
+            incarcator:{steel:1,screw:5,arc:1,polymer:1}
+        }
+    },
+    "PISTOL WM29 (XM3)":{
+        type:"craft",
+        materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
+        bullets:{100:{powder:130,price:7000},200:{powder:260,price:13900},250:{powder:325,price:17400}},
+        attachments:{
+            amortizor:{steel:2,screw:5,polymer:2}
+        }
+    },
+    "MICRO SMG":{
+        type:"craft",
+        materials:{steel:15,screw:95,barrel:1,spring:1,wood:0,polymer:42},
+        bullets:{100:{powder:150,price:8000},200:{powder:300,price:16000},250:{powder:375,price:20000}},
+        attachments:{
+            luneta:{steel:2,screw:10,polymer:2,bec:0,lupa:1},
+            lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+            amortizor:{steel:3,screw:5,polymer:3},
+            incarcator:{steel:2,screw:10,arc:1,polymer:2}
+        }
+    },
+    "MACHINE PISTOL (Tec9)":{
+        type:"craft",
+        materials:{steel:12,screw:100,barrel:0,spring:1,wood:0,polymer:38},
+        bullets:{100:{powder:150,price:8000},200:{powder:300,price:16000},250:{powder:375,price:20000}},
+        attachments:{
+            incarcator:{steel:2,screw:8,arc:1,polymer:2},
+            amortizor:{steel:2,screw:5,polymer:2},
+            baterie:{steel:3,screw:20,arc:1,polymer:3}
+        }
+    },
+    "MINI SMG":{
+        type:"craft",
+        materials:{steel:11,screw:97,barrel:0,spring:1,wood:1,polymer:36},
+        bullets:{100:{powder:150,price:8000},200:{powder:300,price:16000},250:{powder:375,price:20000}},
+        attachments:{
+            incarcator:{steel:2,screw:10,arc:1,polymer:2}
+        }
+    },
+    "TEC PISTOL (Tactical SMG)":{
+        type:"craft",
+        materials:{steel:14,screw:115,barrel:1,spring:1,wood:0,polymer:44},
+        bullets:{100:{powder:180,price:10000},200:{powder:360,price:19000},250:{powder:450,price:24000}},
+        attachments:{
+            luneta:{steel:2,screw:10,polymer:2,lupa:1},
+            incarcator:{steel:2,screw:10,arc:1,polymer:2},
+            suppressor:{steel:3,screw:5,polymer:3}
+        }
+    },
+    "SMG":{
+        type:"craft",
+        materials:{steel:13,screw:105,barrel:1,spring:1,wood:0,polymer:48},
+        bullets:{100:{powder:180,price:10000},200:{powder:360,price:19000},250:{powder:450,price:24000}},
+        attachments:{
+            incarcator:{steel:2,screw:10,arc:1,polymer:2},
+            baterie:{steel:3,screw:20,arc:1,polymer:3},
+            lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+            amortizor:{steel:3,screw:5,polymer:3},
+            luneta:{steel:2,screw:10,polymer:2,lupa:1}
+        }
+    },
+    // Arme pe bani (doar preț)
+    "NAVY PISTOL":{
         type:"money",
         price:400000,
         attachments:{}
+    },
+    "VINTAGE PISTOL":{
+        type:"money",
+        price:25000,
+        attachments:{
+            incarcator:{steel:1,screw:5,arc:1,polymer:1},
+            amortizor:{steel:2,screw:5,polymer:2}
+        }
     }
 };
 
-document.getElementById("weaponSelect").addEventListener("change", function(){
+// ==================================
+// POPULARE DROPDOWN
+// ==================================
+const weaponSelect=document.getElementById("weaponSelect");
+for(let w in weapons){
+    let option=document.createElement("option");
+    option.value=w;
+    option.text=w;
+    weaponSelect.add(option);
+}
 
-    const weapon = weapons[this.value];
-
+// ==================================
+// LOGICA ATAȘAMENTE
+// ==================================
+weaponSelect.addEventListener("change",function(){
+    const weapon=weapons[this.value];
     document.getElementById("result").style.display="none";
-
     if(!weapon) return;
-
+    // gloanțe
+    if(weapon.type==="craft") document.getElementById("bulletsSection").style.display="block";
+    else document.getElementById("bulletsSection").style.display="none";
+    // atașamente
     document.getElementById("attachmentsSection").style.display="block";
-    document.getElementById("quantitySection").style.display="block";
-
-    if(weapon.type==="craft"){
-        document.getElementById("bulletsSection").style.display="block";
-    }else{
-        document.getElementById("bulletsSection").style.display="none";
-    }
-
     const attachDiv=document.getElementById("attachmentList");
     attachDiv.innerHTML="";
+    if(weapon.attachments){
+        for(let att in weapon.attachments){
+            attachDiv.innerHTML+=`<label><input type="checkbox" value="${att}" class="attachCheck"> ${att}</label>`;
+        }
+    }
+    document.getElementById("quantitySection").style.display="block";
+});
 
-    for(let att in weapon.attachments){
-        attachDiv.innerHTML+=`
-        <label>
-        <input type="checkbox" value="${att}" class="attachCheck"> ${att}
-        </label><br>`;
+// "Nu vreau atașamente"
+document.getElementById("noAttach").addEventListener("change",function(){
+    const checks=document.querySelectorAll(".attachCheck");
+    if(this.checked){
+        checks.forEach(c=>c.checked=false);
+        checks.forEach(c=>c.disabled=true);
+    } else{
+        checks.forEach(c=>c.disabled=false);
     }
 });
 
-document.getElementById("noAttach").addEventListener("change", function(){
-    const checks=document.querySelectorAll(".attachCheck");
-    checks.forEach(c=>c.checked=false);
-});
-
+// ==================================
+// CALCUL
+// ==================================
 function calculate(){
-
     const weaponKey=document.getElementById("weaponSelect").value;
     const weapon=weapons[weaponKey];
     if(!weapon) return;
-
     const qty=parseInt(document.getElementById("weaponQty").value);
     let totalSteel=0,totalPolymer=0,totalPowder=0,totalCost=0;
 
     if(weapon.type==="craft"){
-
         totalSteel+=weapon.materials.steel*qty;
-        totalSteel+=Math.floor((weapon.materials.screw*qty)/20);
+        totalSteel+=Math.floor(weapon.materials.screw*qty/20);
         totalSteel+=weapon.materials.barrel*4*qty;
         totalPolymer+=weapon.materials.polymer*qty;
 
@@ -169,10 +277,11 @@ function calculate(){
         totalCost+=weapon.price*qty;
     }
 
+    // atașamente
     const selectedAttachments=document.querySelectorAll(".attachCheck:checked");
-
     selectedAttachments.forEach(att=>{
         const data=weapon.attachments[att.value];
+        if(!data) return;
         totalSteel+=data.steel||0;
         totalSteel+=Math.floor((data.screw||0)/20);
         totalPolymer+=data.polymer||0;
@@ -187,8 +296,6 @@ function calculate(){
     <strong>Cost total estimativ: ${totalCost.toLocaleString()}$</strong>
     `;
 }
-
 </script>
-
 </body>
 </html>
