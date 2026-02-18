@@ -16,7 +16,7 @@ body {
 .container {
     background: rgba(0,0,0,0.85);
     padding: 30px;
-    width:650px;
+    width:700px;
     border-radius: 10px;
     color:white;
 }
@@ -46,7 +46,7 @@ label{display:block; margin:5px 0;}
 <div class="container">
 <h3>Ce vrei să craftezi?</h3>
 <select id="weaponSelect">
-<option value="">-- Selecteaza arma --</option>
+<option value="">-- Selectează arma --</option>
 </select>
 
 <div id="bulletsSection" style="display:none;">
@@ -79,14 +79,14 @@ label{display:block; margin:5px 0;}
 <input type="number" id="weaponQty" min="1" value="1">
 </div>
 
-<button onclick="calculate()">Calculeaza</button>
+<button onclick="calculate()">Calculează</button>
 
 <div id="result" class="result" style="display:none;"></div>
 </div>
 
 <script>
 // ==================================
-// TOATE ARMELE + ATAȘAMENTE + GLOANTE
+// ARME + MATERIAL + ATAȘAMENTE + GLOANTE
 // ==================================
 const weapons = {
 "PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
@@ -163,41 +163,50 @@ const weapons = {
 // ==================================
 // POPULARE DROPDOWN
 // ==================================
-const weaponSelect=document.getElementById("weaponSelect");
-for(let w in weapons){
-    let option=document.createElement("option");
-    option.value=w;
-    option.text=w;
-    weaponSelect.add(option);
-}
+const weaponSelectEl = document.getElementById("weaponSelect");
+weaponSelectEl.innerHTML = '<option value="">-- Selectează arma --</option>';
+Object.keys(weapons).forEach(w => {
+    const option = document.createElement("option");
+    option.value = w;
+    option.text = w;
+    weaponSelectEl.appendChild(option);
+});
 
 // ==================================
 // LOGICA ATAȘAMENTE
 // ==================================
-weaponSelect.addEventListener("change",function(){
-    const weapon=weapons[this.value];
+weaponSelectEl.addEventListener("change", function(){
+    const weapon = weapons[this.value];
     document.getElementById("result").style.display="none";
-    if(!weapon) return;
+    if(!weapon) {
+        document.getElementById("bulletsSection").style.display="none";
+        document.getElementById("attachmentsSection").style.display="none";
+        document.getElementById("quantitySection").style.display="none";
+        return;
+    }
     if(weapon.type==="craft") document.getElementById("bulletsSection").style.display="block";
     else document.getElementById("bulletsSection").style.display="none";
+
     document.getElementById("attachmentsSection").style.display="block";
-    const attachDiv=document.getElementById("attachmentList");
-    attachDiv.innerHTML="";
+    const attachDiv = document.getElementById("attachmentList");
+    attachDiv.innerHTML = "";
     if(weapon.attachments){
-        for(let att in weapon.attachments){
-            attachDiv.innerHTML+=`<label><input type="checkbox" value="${att}" class="attachCheck"> ${att}</label>`;
-        }
+        Object.keys(weapon.attachments).forEach(att => {
+            const label = document.createElement("label");
+            label.innerHTML = `<input type="checkbox" value="${att}" class="attachCheck"> ${att}`;
+            attachDiv.appendChild(label);
+        });
     }
     document.getElementById("quantitySection").style.display="block";
 });
 
-document.getElementById("noAttach").addEventListener("change",function(){
-    const checks=document.querySelectorAll(".attachCheck");
+document.getElementById("noAttach").addEventListener("change", function(){
+    const checks = document.querySelectorAll(".attachCheck");
     if(this.checked){
-        checks.forEach(c=>c.checked=false);
-        checks.forEach(c=>c.disabled=true);
-    } else{
-        checks.forEach(c=>c.disabled=false);
+        checks.forEach(c => c.checked=false);
+        checks.forEach(c => c.disabled=true);
+    } else {
+        checks.forEach(c => c.disabled=false);
     }
 });
 
@@ -205,46 +214,47 @@ document.getElementById("noAttach").addEventListener("change",function(){
 // CALCUL
 // ==================================
 function calculate(){
-    const weaponKey=document.getElementById("weaponSelect").value;
-    const weapon=weapons[weaponKey];
+    const weaponKey = document.getElementById("weaponSelect").value;
+    const weapon = weapons[weaponKey];
     if(!weapon) return;
-    const qty=parseInt(document.getElementById("weaponQty").value);
-    let totalSteel=0,totalPolymer=0,totalPowder=0,totalCost=0;
+    const qty = parseInt(document.getElementById("weaponQty").value);
+    let totalSteel = 0, totalPolymer = 0, totalPowder = 0, totalCost = 0;
 
     if(weapon.type==="craft"){
-        totalSteel+=weapon.materials.steel*qty;
-        totalSteel+=Math.floor(weapon.materials.screw*qty/20);
-        totalSteel+=weapon.materials.barrel*4*qty;
-        totalPolymer+=weapon.materials.polymer*qty;
+        totalSteel += weapon.materials.steel*qty;
+        totalSteel += Math.floor(weapon.materials.screw*qty/20);
+        totalSteel += weapon.materials.barrel*4*qty;
+        totalPolymer += weapon.materials.polymer*qty;
 
-        const bullets=parseInt(document.getElementById("bullets").value);
-        let bulletBase=weapon.bullets[100];
-        if(weapon.bullets[bullets]) bulletBase=weapon.bullets[bullets];
-        totalPowder+=bulletBase.powder;
-        totalCost+=bulletBase.price;
+        const bullets = parseInt(document.getElementById("bullets").value);
+        const baseBullet = weapon.bullets[bullets] || weapon.bullets[100];
+        totalPowder += baseBullet.powder*qty;
+        totalCost += baseBullet.price*qty;
 
-        totalCost+=totalSteel*5000;
-        totalCost+=totalPolymer*150;
-    }else{
-        totalCost+=weapon.price*qty;
+        totalCost += totalSteel*5000;
+        totalCost += totalPolymer*150;
+    } else {
+        totalCost += weapon.price*qty;
     }
 
-    const selectedAttachments=document.querySelectorAll(".attachCheck:checked");
-    selectedAttachments.forEach(att=>{
-        const data=weapon.attachments[att.value];
+    const selectedAttachments = document.querySelectorAll(".attachCheck:checked");
+    selectedAttachments.forEach(att => {
+        const data = weapon.attachments[att.value];
         if(!data) return;
-        totalSteel+=data.steel||0;
-        totalSteel+=Math.floor((data.screw||0)/20);
-        totalPolymer+=data.polymer||0;
+        totalSteel += data.steel || 0;
+        totalSteel += Math.floor((data.screw||0)/20);
+        totalPolymer += data.polymer || 0;
     });
 
-    document.getElementById("result").style.display="block";
-    document.getElementById("result").innerHTML=`
-    <h3>Rezultat</h3>
-    Oțel total: ${totalSteel}<br>
-    Polimer total: ${totalPolymer}<br>
-    Praf de pușcă: ${totalPowder}<br><br>
-    <strong>Cost total estimativ: ${totalCost.toLocaleString()}$</strong>
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result").innerHTML = `
+        <h3>Rezultat</h3>
+        Oțel total: ${totalSteel}<br>
+        Polimer total: ${totalPolymer}<br>
+        Praf de pușcă: ${totalPowder}<br><br>
+        <strong>Cost total estimativ: ${totalCost.toLocaleString()}$</strong>
     `;
 }
-</
+</script>
+</body>
+</html>
