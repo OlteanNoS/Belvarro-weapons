@@ -65,7 +65,7 @@ section.show {max-height:500px;opacity:1;}
 </div>
 
 <script>
-// ==================== DATE ARME COMPLET ====================
+// ==================== DATE ARME ====================
 const weapons={
 "PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
 "COMBAT PISTOL":{type:"craft",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
@@ -99,7 +99,12 @@ Object.keys(weapons).forEach(w=>{
 // ==================== FUNCTII ====================
 function showSection(section){section.classList.add("show");}
 function hideSection(section){section.classList.remove("show");}
-function resetAll(){weaponSelect.value=""; bulletsSelect.innerHTML=""; attachmentList.innerHTML=""; document.getElementById("noAttach").checked=false; hideSection(bulletsSection); hideSection(attachmentsSection); hideSection(quantitySection); calcBtn.style.display="none"; resetBtn.style.display="none"; resultDiv.classList.remove("show"); resultDiv.innerHTML="";}
+function resetAll(){ 
+    bulletsSelect.innerHTML=""; attachmentList.innerHTML=""; document.getElementById("noAttach").checked=false; 
+    hideSection(bulletsSection); hideSection(attachmentsSection); hideSection(quantitySection); 
+    calcBtn.style.display="none"; resetBtn.style.display="none"; resultDiv.classList.remove("show"); 
+    resultDiv.innerHTML=""; 
+}
 
 // ==================== LOGIC PROGRESIV ====================
 weaponSelect.addEventListener("change",()=>{
