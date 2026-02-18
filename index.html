@@ -58,11 +58,16 @@ section.show { max-height:500px; opacity:1;}
 <script>
 // ==================== DATE ARME + ATAȘAMENTE ====================
 const weapons={
-"PISTOL":{type:"craft",img:"https://i.imgur.com/2V6Uq0l.png",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{img:"https://i.imgur.com/KU2s0Gp.png",steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{img:"https://i.imgur.com/FjPCvXP.png",steel:2,screw:5,polymer:2},incarcator:{img:"https://i.imgur.com/y7F1pQa.png",steel:1,screw:5,arc:1,polymer:1}}}},
-"COMBAT PISTOL":{type:"craft",img:"https://i.imgur.com/dcXtDjp.png",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{img:"https://i.imgur.com/KU2s0Gp.png",steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{img:"https://i.imgur.com/FjPCvXP.png",steel:2,screw:5,polymer:2},incarcator:{img:"https://i.imgur.com/y7F1pQa.png",steel:1,screw:5,arc:1,polymer:1}}}},
-"VINTAGE PISTOL":{type:"money",img:"https://i.imgur.com/VHgxv6t.png",price:25000,attachments:{incarcator:{img:"https://i.imgur.com/y7F1pQa.png",steel:1,screw:5,arc:1,polymer:1},amortizor:{img:"https://i.imgur.com/FjPCvXP.png",steel:2,screw:5,polymer:2}}}},
-"TEC PISTOL (Tactical SMG)":{type:"craft",img:"https://i.imgur.com/Xm2r1Mi.png",materials:{steel:14,screw:115,barrel:1,spring:1,wood:0,polymer:44},bullets:{100:150,200:300,250:375},attachments:{luneta:{img:"https://i.imgur.com/ZR8Vf2E.png",steel:2,screw:10,arc:0,polymer:2,bec:0,lupa:1},incarcator:{img:"https://i.imgur.com/y7F1pQa.png",steel:2,screw:10,arc:1,polymer:2},suppresor:{img:"https://i.imgur.com/FjPCvXP.png",steel:3,screw:5,arc:0,polymer:3}}}},
-"MICRO SMG":{type:"craft",img:"https://i.imgur.com/QAxDcJH.png",materials:{steel:15,screw:95,barrel:1,spring:1,wood:0,polymer:42},bullets:{100:150,200:300,250:375},attachments:{luneta:{img:"https://i.imgur.com/ZR8Vf2E.png",steel:2,screw:10,arc:0,polymer:2,bec:0,lupa:1},lanterna:{img:"https://i.imgur.com/KU2s0Gp.png",steel:1,screw:5,arc:0,polymer:1,bec:1,lupa:1},amortizor:{img:"https://i.imgur.com/FjPCvXP.png",steel:3,screw:5,arc:0,polymer:3},incarcator:{img:"https://i.imgur.com/y7F1pQa.png",steel:2,screw:10,arc:1,polymer:2}}}}
+"PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}}},
+"COMBAT PISTOL":{type:"craft",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}}},
+"PISTOL MK2":{type:"craft",materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},bullets:{100:130,200:260,250:325},attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},mountedScope:{steel:2,screw:10,polymer:2,lupa:1},amortizor:{steel:2,screw:5,polymer:2},lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}}}},
+"CERAMIC PISTOL":{type:"craft",materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:18},bullets:{100:130,200:260,250:325},attachments:{amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}}},
+"PISTOL WM29 (XM3)":{type:"craft",materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:130,200:260,250:325},attachments:{amortizor:{steel:2,screw:5,polymer:2}}}},
+"MICRO SMG":{type:"craft",materials:{steel:15,screw:95,barrel:1,spring:1,wood:0,polymer:42},bullets:{100:150,200:300,250:375},attachments:{luneta:{steel:2,screw:10,polymer:2,lupa:1},lanterna:{steel:1,screw:5,polymer:1,bec:1,lupa:1},amortizor:{steel:3,screw:5,polymer:3},incarcator:{steel:2,screw:10,arc:1,polymer:2}}}},
+"TEC PISTOL (Tactical SMG)":{type:"craft",materials:{steel:14,screw:115,barrel:1,spring:1,wood:0,polymer:44},bullets:{100:150,200:300,250:375},attachments:{luneta:{steel:2,screw:10,polymer:2,lupa:1},incarcator:{steel:2,screw:10,arc:1,polymer:2},suppresor:{steel:3,screw:5,polymer:3}}}},
+"VINTAGE PISTOL":{type:"money",price:25000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:2,screw:5,polymer:2}}}},
+"DB":{type:"money",price:250000,attachments:{}},
+"Navy Pistol":{type:"money",price:400000,attachments:{}}
 };
 
 // ==================== ELEMENTE UI ====================
@@ -92,8 +97,10 @@ weaponSelect.addEventListener("change",()=>{
     hideAll();
     const w=weapons[weaponSelect.value];
     if(!w) {weaponPreview.src=""; return;}
-    weaponPreview.src=w.img;
+    weaponPreview.src="";
+    weaponPreview.src=""; 
     if(w.type==="craft"){
+        bulletsSelect.innerHTML="";
         Object.keys(w.bullets).forEach(b=>{ const opt=document.createElement("option"); opt.value=b; opt.text=b; bulletsSelect.appendChild(opt); });
         showSection(bulletsSection);
     } else showSection(quantitySection);
@@ -107,7 +114,7 @@ bulletsSelect.addEventListener("change",()=>{
     Object.keys(w.attachments).forEach(att=>{
         const lbl=document.createElement("label"); lbl.className="attachStep";
         const a=w.attachments[att];
-        lbl.innerHTML=`<input type="checkbox" class="attachCheck" value="${att}"> <img src="${a.img}"> ${att}`;
+        lbl.innerHTML=`<input type="checkbox" class="attachCheck" value="${att}"> ${att}`;
         attachmentList.appendChild(lbl);
     });
     showSection(quantitySection);
@@ -135,10 +142,8 @@ calcBtn.addEventListener("click",()=>{
     if(w.type==="craft"){ totalCost+=totals.steel*5000; totalCost+=Math.floor(totals.screw/20)*5000; totalCost+=totals.barrel*4*5000; totalCost+=totals.polymer*150; totalCost+=totals.powder*150; } 
     else totalCost+=w.price*qty;
 
-    let attHTML=""; document.querySelectorAll(".attachCheck:checked").forEach(att=>{attHTML+=`<img src="${w.attachments[att.value].img}">`;});
-
     resultDiv.innerHTML=`<h3>Rezultat</h3>
-    <img src="${w.img}"> ${weaponSelect.value}<br>${attHTML}<br>
+    ${weaponSelect.value}<br>
     Oțel:${totals.steel}<br>Șurub:${totals.screw}<br>Țeavă:${totals.barrel}<br>Arc:${totals.spring}<br>Lemn:${totals.wood}<br>Polimer:${totals.polymer}<br>Praf:${totals.powder}<br><strong>Total:${totalCost}$</strong>`;
 });
 
