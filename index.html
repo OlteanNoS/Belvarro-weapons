@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <title>FiveM Craft Calculator</title>
 <style>
-body {margin:0;font-family:Arial;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;}
-.container {background: rgba(0,0,0,0.85); padding:30px; width:750px; border-radius:10px; color:white;}
-select, input, button {width:100%; padding:8px; margin-top:10px;}
+body {margin:0;font-family:Arial;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.container {background: rgba(0,0,0,0.85); padding:30px; width:800px; border-radius:10px; color:white;}
+select, input, button {width:100%; padding:8px; margin-top:10px; font-size:14px;}
 button {cursor:pointer; background:#2ecc71; border:none; color:white; font-weight:bold;}
 .result {margin-top:20px; padding:15px; background:#222; border-radius:8px;}
 h3 {margin:10px 0 5px 0;}
@@ -39,8 +39,7 @@ label{display:block;margin:5px 0;}
 </div>
 
 <script>
-// ==================== DATELE ARME ====================
-// Structură completă cu toate armele și atașamentele conform datelor tale
+// ==================== DATELE ARME COMPLET ====================
 const weapons = {
 "PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
     bullets:{100:{powder:100,price:5400},200:{powder:200,price:10666},250:{powder:250,price:13333}},
@@ -82,7 +81,7 @@ const weapons = {
     bullets:{100:{powder:180,price:10000},200:{powder:360,price:19000},250:{powder:450,price:24000}},
     attachments:{incarcator:{steel:2,screw:10,arc:1,polymer:2},baterie:{steel:3,screw:20,arc:1,polymer:3},lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:3,screw:5,polymer:3},luneta:{steel:2,screw:10,polymer:2,lupa:1}}
 },
-// Arme pe bani
+// ===== Arme pe bani =====
 "NAVY PISTOL":{type:"money",price:400000,attachments:{}},
 "VINTAGE PISTOL":{type:"money",price:25000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:2,screw:5,polymer:2}}},
 "DB":{type:"money",price:250000,attachments:{}},
@@ -131,7 +130,7 @@ weaponSelect.addEventListener("change",()=>{
         });
     }
 
-    if(weapon.attachments){
+    if(weapon.attachments && Object.keys(weapon.attachments).length>0){
         attachmentsSection.style.display="block";
         Object.keys(weapon.attachments).forEach(att=>{
             const lbl = document.createElement("label");
