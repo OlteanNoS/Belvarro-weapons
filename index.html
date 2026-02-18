@@ -2,131 +2,52 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>FiveM Armes Craft Calculator Animat & Interactiv</title>
+<title>FiveM Craft Calculator</title>
 <style>
 body {
-    margin:0;
-    font-family: Arial;
-    background:#111;
-    color:white;
-    display:flex;
-    justify-content:center;
-    padding:20px;
+  margin:0; font-family: Arial; background:#111; color:white; display:flex; justify-content:center; padding:20px;
 }
 .container {
-    background: rgba(0,0,0,0.95);
-    padding:30px;
-    width:1000px;
-    border-radius:10px;
-    transition:all 0.3s;
+  background: rgba(0,0,0,0.95); padding:30px; width:1000px; border-radius:10px; transition:all 0.3s;
 }
-.field {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-}
-.field label {
-    width: 200px;
-    margin-right: 15px;
-}
+.field { display:flex; align-items:center; margin:10px 0; }
+.field label { width:200px; margin-right:15px; }
 .field select, .field input {
-    flex: 1;
-    padding:8px;
-    font-size:14px;
-    border-radius:5px;
-    border:1px solid #444;
-    background:#222;
-    color:white;
-    transition:0.3s;
+  flex:1; padding:8px; font-size:14px; border-radius:5px; border:1px solid #444; background:#222; color:white; transition:0.3s;
 }
-.field select:hover, .field input:hover {
-    background:#333;
-}
-.field select:focus, .field input:focus {
-    outline:none;
-    border-color:#2ecc71;
-}
+.field select:hover, .field input:hover { background:#333; }
+.field select:focus, .field input:focus { outline:none; border-color:#2ecc71; }
 button {
-    cursor:pointer;
-    background:#2ecc71;
-    border:none;
-    color:white;
-    font-weight:bold;
-    padding:10px;
-    margin-top:15px;
-    transition:0.3s;
+  cursor:pointer; background:#2ecc71; border:none; color:white; font-weight:bold; padding:10px; margin-top:15px; transition:0.3s;
 }
 button:hover {background:#27ae60;}
 .result {
-    margin-top:20px;
-    padding:15px;
-    background:#222;
-    border-radius:8px;
-    transition:all 0.5s;
-    transform: translateY(-20px);
-    opacity:0;
+  margin-top:20px; padding:15px; background:#222; border-radius:8px; transition:all 0.5s;
+  transform: translateY(-20px); opacity:0;
 }
-.result.show {
-    opacity:1;
-    transform: translateY(0);
-}
+.result.show { opacity:1; transform:translateY(0);}
 h3 {margin:10px 0 5px 0;}
-.attachStep {
-    display:flex;
-    align-items:center;
-    margin:5px 0;
-    opacity:0;
-    transform:translateX(-20px);
-    transition: all 0.4s;
-}
-.attachStep.show {
-    opacity:1;
-    transform:translateX(0);
-}
-.attachStep input[type="checkbox"] {
-    margin-right:10px;
-    width:18px;
-    height:18px;
-    accent-color:#2ecc71; /* culoare checkbox selectat */
-    cursor:pointer;
-}
-.attachStep input[type="checkbox"]:hover {
-    transform: scale(1.2);
-    transition:0.2s;
-}
-section {
-    overflow:hidden;
-    max-height:0;
-    opacity:0;
-    transition:max-height 0.5s ease-out, opacity 0.3s;
-}
-section.show {max-height:500px;opacity:1;}
+.attachStep { display:flex; align-items:center; margin:5px 0; opacity:0; transform:translateX(-20px); transition: all 0.4s;}
+.attachStep.show { opacity:1; transform:translateX(0);}
+.attachStep input[type="checkbox"] { margin-right:10px; width:18px; height:18px; accent-color:#2ecc71; cursor:pointer;}
+.attachStep input[type="checkbox"]:hover { transform: scale(1.2); transition:0.2s;}
+section { overflow:hidden; max-height:0; opacity:0; transition:max-height 0.5s ease-out, opacity 0.3s;}
+section.show { max-height:500px; opacity:1;}
 .popup {
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.7);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    opacity:0;
-    transform:translateY(50px);
-    transition:all 0.4s;
-    pointer-events:none;
+  position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center;
+  opacity:0; transform:translateY(50px); transition:all 0.4s; pointer-events:none;
 }
-.popup.show {
-    opacity:1;
-    transform:translateY(0);
-    pointer-events:auto;
-}
-.popupContent {
-    background:#222;
-    padding:20px;
-    border-radius:10px;
-    color:white;
-    min-width:300px;
-}
-.popupContent button {margin-top:10px;cursor:pointer;}
+.popup.show { opacity:1; transform:translateY(0); pointer-events:auto;}
+.popupContent { background:#222; padding:20px; border-radius:10px; color:white; min-width:300px;}
+.popupContent button { margin-top:10px; cursor:pointer;}
+/* Rezultat color materiale */
+.material-steel {color:#2ecc71;}
+.material-screw {color:#f39c12;}
+.material-barrel {color:#3498db;}
+.material-spring {color:#9b59b6;}
+.material-wood {color:#e67e22;}
+.material-polymer {color:#1abc9c;}
+.material-powder {color:#f1c40f;}
 </style>
 </head>
 <body>
@@ -158,6 +79,7 @@ section.show {max-height:500px;opacity:1;}
 </section>
 
 <button id="calcBtn" style="display:none;">Calculează</button>
+<button id="resetBtn" style="display:none;">Resetează</button>
 <div id="result" class="result"></div>
 </div>
 
@@ -169,7 +91,7 @@ section.show {max-height:500px;opacity:1;}
 </div>
 
 <script>
-// ==================== DATELE ARME ====================
+// ==================== DATE ARME ====================
 const weapons={
 "PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
 "COMBAT PISTOL":{type:"craft",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
@@ -184,6 +106,7 @@ const attachmentsSection=document.getElementById("attachmentsSection");
 const attachmentList=document.getElementById("attachmentList");
 const quantitySection=document.getElementById("quantitySection");
 const calcBtn=document.getElementById("calcBtn");
+const resetBtn=document.getElementById("resetBtn");
 const resultDiv=document.getElementById("result");
 
 // Populare select arme
@@ -196,15 +119,16 @@ Object.keys(weapons).forEach(w=>{
 function showSection(section){section.classList.add("show");}
 function hideSection(section){section.classList.remove("show");}
 function showPopup(msg){document.getElementById('popupText').innerText=msg;document.getElementById('popup').classList.add('show');}
+function resetAll(){
+    weaponSelect.value=""; bulletsSelect.innerHTML=""; attachmentList.innerHTML=""; document.getElementById("noAttach").checked=false;
+    hideSection(bulletsSection); hideSection(attachmentsSection); hideSection(quantitySection);
+    calcBtn.style.display="none"; resetBtn.style.display="none"; resultDiv.classList.remove("show");
+}
 
 // ==================== LOGIC PROGRESIV ====================
 weaponSelect.addEventListener("change",()=>{
+    resetSections();
     const weapon=weapons[weaponSelect.value];
-    hideSection(bulletsSection); hideSection(attachmentsSection); hideSection(quantitySection);
-    calcBtn.style.display="none"; resultDiv.classList.remove("show");
-    bulletsSelect.innerHTML=""; attachmentList.innerHTML="";
-    document.getElementById("noAttach").checked=false;
-
     if(!weapon) return;
 
     if(weapon.type==="craft"){
@@ -215,9 +139,15 @@ weaponSelect.addEventListener("change",()=>{
         setTimeout(()=>showSection(bulletsSection),50);
     } else {
         setTimeout(()=>showSection(quantitySection),50);
-        calcBtn.style.display="block";
+        calcBtn.style.display="block"; resetBtn.style.display="block";
     }
 });
+
+function resetSections(){
+    hideSection(bulletsSection); hideSection(attachmentsSection); hideSection(quantitySection);
+    calcBtn.style.display="none"; resetBtn.style.display="none"; resultDiv.classList.remove("show");
+    bulletsSelect.innerHTML=""; attachmentList.innerHTML=""; document.getElementById("noAttach").checked=false;
+}
 
 bulletsSelect.addEventListener("change",()=>{
     const weapon=weapons[weaponSelect.value];
@@ -238,7 +168,7 @@ bulletsSelect.addEventListener("change",()=>{
     }
     addNextAttachment();
     setTimeout(()=>showSection(quantitySection),50);
-    calcBtn.style.display="block";
+    calcBtn.style.display="block"; resetBtn.style.display="block";
 });
 
 document.getElementById("noAttach").addEventListener("change",function(){
@@ -279,16 +209,19 @@ calcBtn.addEventListener("click",()=>{
     }else totalCost+=weapon.price*qty;
 
     resultDiv.innerHTML=`<h3>Rezultat</h3>
-    Oțel: ${totals.steel}<br>
-    Șurub: ${totals.screw}<br>
-    Țeavă: ${totals.barrel}<br>
-    Arc: ${totals.spring}<br>
-    Lemn: ${totals.wood}<br>
-    Polimer: ${totals.polymer}<br>
-    Praf de pușcă: ${totals.powder}<br>
+    <span class="material-steel">Oțel: ${totals.steel}</span><br>
+    <span class="material-screw">Șurub: ${totals.screw}</span><br>
+    <span class="material-barrel">Țeavă: ${totals.barrel}</span><br>
+    <span class="material-spring">Arc: ${totals.spring}</span><br>
+    <span class="material-wood">Lemn: ${totals.wood}</span><br>
+    <span class="material-polymer">Polimer: ${totals.polymer}</span><br>
+    <span class="material-powder">Praf de pușcă: ${totals.powder}</span><br>
     <br><strong>Cost total estimativ: ${totalCost.toLocaleString()}$</strong>`;
     resultDiv.classList.add("show");
+    resetBtn.style.display="block";
 });
+
+resetBtn.addEventListener("click", resetAll);
 </script>
 </body>
 </html>
