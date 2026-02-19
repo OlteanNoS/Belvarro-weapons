@@ -1,239 +1,519 @@
-function attachment(name, data){ return { name, data }; }
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FiveM Craft Calculator</title>
+<style>
+  body{
+    margin:0; font-family: Arial;
+    background:#111; color:#fff;
+    display:flex; justify-content:center; padding:20px;
+  }
+  .container{
+    background: rgba(0,0,0,0.95);
+    padding:30px; width:1000px;
+    border-radius:10px;
+  }
+  .field{display:flex; align-items:center; margin:10px 0;}
+  .field label{width:220px; margin-right:15px;}
+  .field select,.field input{
+    flex:1; padding:8px; font-size:14px;
+    border-radius:6px; border:1px solid #444;
+    background:#222; color:#fff;
+  }
+  .field select:focus,.field input:focus{outline:none; border-color:#2ecc71;}
+  button{
+    cursor:pointer; background:#2ecc71; border:none;
+    color:#fff; font-weight:bold; padding:10px;
+    margin-top:15px; border-radius:6px;
+  }
+  button:hover{background:#27ae60;}
+  h3{margin:10px 0 8px;}
+  .attachments{margin-top:8px; padding:10px; background:#141414; border-radius:8px;}
+  .attach{margin:6px 0;}
+  .result{
+    margin-top:20px; padding:15px; background:#222;
+    border-radius:8px; display:none;
+  }
+  .muted{opacity:0.75; font-size:13px;}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+</style>
+</head>
+<body>
 
+<div class="container">
+  <h3>Ce vrei să craftezi?</h3>
+
+  <div class="field">
+    <label for="weaponSelect">Arma:</label>
+    <select id="weaponSelect">
+      <option value="">-- Selectează arma --</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="bulletsSelect">Gloanțe:</label>
+    <select id="bulletsSelect"></select>
+  </div>
+
+  <div class="attachments">
+    <div class="row">
+      <h3 style="margin:0;">Atașamente</h3>
+      <label class="muted" style="margin-left:auto;">
+        <input type="checkbox" id="noAttach" />
+        Nu vreau atașamente
+      </label>
+    </div>
+    <div id="attachmentsList"></div>
+  </div>
+
+  <div class="field">
+    <label for="qty">Număr arme:</label>
+    <input type="number" id="qty" min="1" value="1"/>
+  </div>
+
+  <button id="calcBtn">Calculează</button>
+
+  <div id="result" class="result"></div>
+</div>
+
+<script>
+/**
+ * REGULI PREȚURI:
+ * - 1 oțel = 5000$
+ * - 20 șuruburi = 1 oțel => cost șuruburi: floor(screw/20)*5000
+ * - polimer = 150$
+ * - arc/lemn: ignor cost (infim)
+ *
+ * GLOANȚE:
+ * - EXACT ca în tabel la 100/200/250 (praf + preț)
+ * - pentru 300..2000: interpolare / extrapolare liniară pe segmente:
+ *    100-200, 200-250, apoi >250 folosește panta 200-250
+ * - la armele unde tabelul începe cu 150/300/375 etc. (pe bani),
+ *   tot mapăm 100/200/250 folosind exact valorile date (din tabelul tău),
+ *   apoi interpolăm la fel (practic funcționează pentru orice 3 puncte).
+ */
+
+const BULLET_OPTIONS = [];
+for(let b=100;b<=2000;b+=100) BULLET_OPTIONS.push(b);
+
+function att(name, data){ return { name, data }; }
+function emptyTotals(){
+  return {steel:0,screw:0,barrel:0,spring:0,wood:0,polymer:0,bec:0,lupa:0,powder:0};
+}
+
+// -------------------- AMMO TABLE (EXACT din tabelul tău) --------------------
+// IMPORTANT: fiecare armă are exact 3 puncte: 100, 200, 250 (gloanțe).
+// Noi folosim aceste puncte, iar pentru restul (300..2000) facem extrapolare.
+const ammoTable = {
+  // Craft (15)
+  "PISTOL":                   [{b:100,powder:100,price:5400},{b:200,powder:200,price:10666},{b:250,powder:250,price:13333}],
+  "COMBAT PISTOL":            [{b:100,powder:100,price:5400},{b:200,powder:200,price:10700},{b:250,powder:250,price:13400}],
+  "PISTOL MK2":               [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+  "CERAMIC PISTOL":           [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+  "PISTOL WM29 (XM3)":        [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+
+  "MICRO SMG":                [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "MACHINE PISTOL (Tec9)":    [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "MINI SMG":                 [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+
+  "TEC PISTOL (Tactical SMG)":[{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "SMG":                      [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "COMBAT PDW":               [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+
+  "ASSAULT RIFLE (AK)":       [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
+  "COMPACT RIFLE":            [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
+  "CARABINE RIFLE":           [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "ADVANCED RIFLE":           [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+
+  // Pe bani (8) – exact din tabelul tău (blocul “de aici în jos”)
+  "Navy Pistol":              [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
+  "VINTIGE PISTOL":           [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "DB":                       [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
+  "ASSAULTRIFE MK2 (AK)":     [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "HEAVYRIFLE":               [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "COMBAT MG":                [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "GUSENBERG":                [{b:100,powder:180,price:9600},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "MG":                       [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+};
+
+// Interpolare liniară între două puncte
+function lerp(a,b,t){ return a + (b-a)*t; }
+
+// Returnează {powder, price} pentru bullets (100..2000) pe baza celor 3 puncte
+function ammoExactInterpolated(weaponName, bullets){
+  const pts = ammoTable[weaponName];
+  if(!pts) return {powder:0, price:0};
+
+  // asigură ordinea
+  const p100 = pts[0], p200 = pts[1], p250 = pts[2];
+
+  if(bullets <= p100.b) return {powder:p100.powder, price:p100.price};
+
+  if(bullets <= p200.b){
+    const t = (bullets - p100.b) / (p200.b - p100.b);
+    return {
+      powder: lerp(p100.powder, p200.powder, t),
+      price:  lerp(p100.price,  p200.price,  t)
+    };
+  }
+
+  if(bullets <= p250.b){
+    const t = (bullets - p200.b) / (p250.b - p200.b);
+    return {
+      powder: lerp(p200.powder, p250.powder, t),
+      price:  lerp(p200.price,  p250.price,  t)
+    };
+  }
+
+  // > 250: extrapolare cu panta 200-250
+  const slopePowder = (p250.powder - p200.powder) / (p250.b - p200.b);
+  const slopePrice  = (p250.price  - p200.price ) / (p250.b - p200.b);
+  const extra = bullets - p250.b;
+
+  return {
+    powder: p250.powder + slopePowder * extra,
+    price:  p250.price  + slopePrice  * extra
+  };
+}
+
+// ===================== WEAPONS (TOATE) =====================
 const weapons = [
-
-  // =========================
   // CRAFT (în ordinea ta)
-  // =========================
-
-  {
-    name:"PISTOL",
-    type:"craft",
+  { name:"PISTOL", type:"craft",
     materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
-    bullet:{powder:100,price:5400},
     attachments:[
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Amortizor",{steel:2,screw:5,polymer:2}),
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Amortizor",{steel:2,screw:5,polymer:2}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
     ]
   },
-
-  {
-    name:"COMBAT PISTOL",
-    type:"craft",
+  { name:"COMBAT PISTOL", type:"craft",
     materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},
-    bullet:{powder:100,price:5400},
     attachments:[
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Amortizor",{steel:2,screw:5,polymer:2}),
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Amortizor",{steel:2,screw:5,polymer:2}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
     ]
   },
-
-  {
-    name:"PISTOL MK2",
-    type:"craft",
+  { name:"PISTOL MK2", type:"craft",
     materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
-    bullet:{powder:130,price:7000},
     attachments:[
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
-      attachment("Mounted-Scope",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Amortizor",{steel:2,screw:5,polymer:2}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Mounted-Scope",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Amortizor",{steel:2,screw:5,polymer:2}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
     ]
   },
-
-  {
-    name:"CERAMIC PISTOL",
-    type:"craft",
+  { name:"CERAMIC PISTOL", type:"craft",
     materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:18},
-    bullet:{powder:130,price:7000},
     attachments:[
-      attachment("Amortizor",{steel:2,screw:5,polymer:2}),
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
+      att("Amortizor",{steel:2,screw:5,polymer:2}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1})
     ]
   },
-
-  {
-    name:"PISTOL WM29 (XM3)",
-    type:"craft",
+  { name:"PISTOL WM29 (XM3)", type:"craft",
     materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
-    bullet:{powder:130,price:7000},
     attachments:[
-      attachment("Amortizor",{steel:2,screw:5,polymer:2})
+      att("Amortizor",{steel:2,screw:5,polymer:2})
     ]
   },
 
-  {
-    name:"MICRO SMG",
-    type:"craft",
+  { name:"MICRO SMG", type:"craft",
     materials:{steel:15,screw:95,barrel:1,spring:1,wood:0,polymer:42},
-    bullet:{powder:150,price:8000},
     attachments:[
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Amortizor",{steel:3,screw:5,polymer:3}),
-      attachment("Încărcător",{steel:2,screw:10,spring:1,polymer:2})
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Încărcător",{steel:2,screw:10,spring:1,polymer:2})
     ]
   },
-
-  {
-    name:"MACHINE PISTOL (Tec9)",
-    type:"craft",
+  { name:"MACHINE PISTOL (Tec9)", type:"craft",
     materials:{steel:12,screw:100,barrel:0,spring:1,wood:0,polymer:38},
-    bullet:{powder:150,price:8000},
     attachments:[
-      attachment("Amortizor",{steel:2,screw:5,polymer:2}),
-      attachment("Încărcător",{steel:2,screw:8,spring:1,polymer:2})
+      // (fără bateria aia, cum ai cerut)
+      att("Amortizor",{steel:2,screw:5,polymer:2}),
+      att("Încărcător",{steel:2,screw:8,spring:1,polymer:2})
     ]
   },
-
-  {
-    name:"MINI SMG",
-    type:"craft",
+  { name:"MINI SMG", type:"craft",
     materials:{steel:11,screw:97,barrel:0,spring:1,wood:1,polymer:36},
-    bullet:{powder:150,price:8000},
     attachments:[
-      attachment("Încărcător",{steel:2,screw:10,spring:1,polymer:2})
+      att("Încărcător",{steel:2,screw:10,spring:1,polymer:2})
     ]
   },
-
-  {
-    name:"TEC PISTOL (Tactical SMG)",
-    type:"craft",
+  { name:"TEC PISTOL (Tactical SMG)", type:"craft",
     materials:{steel:14,screw:115,barrel:1,spring:1,wood:0,polymer:44},
-    bullet:{powder:180,price:10000},
     attachments:[
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
-      attachment("Suppresor-Muzzle-Brake",{steel:3,screw:5,polymer:3})
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
+      att("Suppresor-Muzzle-Brake",{steel:3,screw:5,polymer:3})
     ]
   },
-
-  {
-    name:"SMG",
-    type:"craft",
+  { name:"SMG", type:"craft",
     materials:{steel:13,screw:105,barrel:1,spring:1,wood:0,polymer:48},
-    bullet:{powder:180,price:10000},
     attachments:[
-      attachment("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
-      attachment("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Amortizor",{steel:3,screw:5,polymer:3}),
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1})
+      att("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
+      att("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1})
     ]
   },
-
-  {
-    name:"COMBAT PDW",
-    type:"craft",
+  { name:"COMBAT PDW", type:"craft",
     materials:{steel:14,screw:110,barrel:1,spring:1,wood:0,polymer:50},
-    bullet:{powder:180,price:10000},
     attachments:[
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
-      attachment("Grip",{steel:1,screw:5,polymer:1})
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Încărcător",{steel:2,screw:10,spring:1,polymer:2}),
+      att("Grip",{steel:1,screw:5,polymer:1})
     ]
   },
 
-  {
-    name:"ASSAULT RIFLE (AK)",
-    type:"craft",
+  { name:"ASSAULT RIFLE (AK)", type:"craft",
     materials:{steel:21,screw:135,barrel:1,spring:2,wood:1,polymer:68},
-    bullet:{powder:250,price:13400},
     attachments:[
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
-      attachment("Amortizor",{steel:3,screw:5,polymer:3}),
-      attachment("Încărcător",{steel:2,screw:5,spring:1,polymer:2}),
-      attachment("Grip",{steel:1,screw:5,polymer:1}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Încărcător",{steel:2,screw:5,spring:1,polymer:2}),
+      att("Grip",{steel:1,screw:5,polymer:1}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
     ]
   },
-
-  {
-    name:"COMPACT RIFLE",
-    type:"craft",
+  { name:"COMPACT RIFLE", type:"craft",
     materials:{steel:19,screw:115,barrel:1,spring:2,wood:1,polymer:44},
-    bullet:{powder:250,price:13400},
     attachments:[
-      attachment("Încărcător",{steel:3,screw:30,spring:1,polymer:3}),
-      attachment("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3})
+      att("Încărcător",{steel:3,screw:30,spring:1,polymer:3}),
+      att("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3})
     ]
   },
-
-  {
-    name:"CARABINE RIFLE",
-    type:"craft",
+  { name:"CARABINE RIFLE", type:"craft",
     materials:{steel:18,screw:140,barrel:1,spring:2,wood:0,polymer:72},
-    bullet:{powder:300,price:16000},
     attachments:[
-      attachment("Grip",{steel:1,screw:5,polymer:1}),
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
-      attachment("Amortizor",{steel:3,screw:5,polymer:3}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
+      att("Grip",{steel:1,screw:5,polymer:1}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Baterie-Gloante",{steel:3,screw:20,spring:1,polymer:3}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1})
     ]
   },
-
-  {
-    name:"ADVANCED RIFLE",
-    type:"craft",
+  { name:"ADVANCED RIFLE", type:"craft",
     materials:{steel:18,screw:145,barrel:1,spring:2,wood:0,polymer:78},
-    bullet:{powder:300,price:16000},
     attachments:[
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Amortizor",{steel:3,screw:5,polymer:3}),
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
-      attachment("Lunetă",{steel:2,screw:10,polymer:2,lupa:1})
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1})
     ]
   },
 
-  // =========================
   // PE BANI (în ordinea ta)
-  // =========================
-
-  {
-    name:"Navy Pistol",
-    type:"money",
-    price:400000,
-    bullet:{powder:500,price:26700},
-    attachments:[] // nu ai dat tabel complet pentru Navy; dacă vrei îl adaugăm
-  },
-
-  {
-    name:"VINTIGE PISTOL",
-    type:"money",
-    price:25000,
-    bullet:{powder:150,price:8000},
+  { name:"Navy Pistol", type:"money", price:400000, attachments:[] },
+  { name:"VINTIGE PISTOL", type:"money", price:25000,
     attachments:[
-      attachment("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
-      attachment("Amortizor",{steel:2,screw:5,polymer:2})
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Amortizor",{steel:2,screw:5,polymer:2})
     ]
   },
-
-  {
-    name:"DB",
-    type:"money",
-    price:250000,
-    bullet:{powder:500,price:26700},
-    attachments:[] // nu ai dat tabel complet pentru DB; dacă vrei îl adaugăm
-  },
-
-  {
-    name:"ASSAULTRIFE MK2 (AK)",
-    type:"money",
-    price:70000,
-    bullet:{powder:300,price:16000},
+  { name:"DB", type:"money", price:250000, attachments:[] },
+  { name:"ASSAULTRIFE MK2 (AK)", type:"money", price:70000,
     attachments:[
-      attachment("Lunetă-Mică",{steel:2,screw:10,polymer:2,lupa:1}),
-      attachment("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
-      attachment("Încărcător",{steel:2,screw:5,spring:1,polymer:2}),
-      attachment("Lunetă-Mare",{steel:2,screw:12,polymer:2,lupa:1}),
-      attachment("Grip",{steel:1,screw:5,polymer:1}),
-      attachment("Țeavă",{steel:4,screw:16,polymer:4}),
-      attachment("Heavy Dutty Muzzle Brake",{steel:1,screw:4,polymer:1}),
-      attachment("Vizor-Holografic",{steel:1,s
+      att("Lunetă-Mica",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Încărcător",{steel:2,screw:5,spring:1,polymer:2}),
+      att("Lunetă-Mare",{steel:2,screw:12,polymer:2,lupa:1}),
+      att("Grip",{steel:1,screw:5,polymer:1}),
+      att("Țeavă",{steel:4,screw:16,polymer:4}),
+      att("Heavy Dutty Muzzle Brake",{steel:1,screw:4,polymer:1}),
+      att("Vizor-Holografic",{steel:1,screw:8,polymer:1,lupa:1}),
+      att("Flat-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Slanded-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Tactical-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Precision-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Split-End-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Fat-End-Muzzle-Brake",{steel:1,screw:4,polymer:1})
+    ]
+  },
+  { name:"HEAVYRIFLE", type:"money", price:60000,
+    attachments:[
+      att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Amortizor",{steel:3,screw:5,polymer:3}),
+      att("Grip",{steel:1,screw:5,polymer:1})
+    ]
+  },
+  { name:"COMBAT MG", type:"money", price:120000,
+    attachments:[
+      att("Lunetă-Mare",{steel:2,screw:12,polymer:2,lupa:1}),
+      att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
+      att("Grip",{steel:1,screw:5,polymer:1}),
+      att("Lunetă-Medie",{steel:2,screw:10,polymer:2,lupa:1}),
+      att("Țeavă",{steel:4,screw:16,polymer:4}),
+      att("Vizor holografic",{steel:1,screw:8,polymer:1,lupa:1}),
+      att("Slanded-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Fat-End-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Heavy Dutty-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Precision-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Tactical-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Flat-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
+      att("Split-End-Muzzle-Brake",{steel:1,screw:4,polymer:1})
+    ]
+  },
+  { name:"GUSENBERG", type:"money", price:45000, attachments:[] },
+  { name:"MG", type:"money", price:90000, attachments:[] }
+];
+
+// ===================== UI =====================
+const weaponSelect = document.getElementById("weaponSelect");
+const bulletsSelect = document.getElementById("bulletsSelect");
+const attachmentsList = document.getElementById("attachmentsList");
+const noAttach = document.getElementById("noAttach");
+const calcBtn = document.getElementById("calcBtn");
+const resultDiv = document.getElementById("result");
+
+function fillWeapons(){
+  weapons.forEach((w,i)=>{
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = w.name;
+    weaponSelect.appendChild(opt);
+  });
+}
+
+function fillBullets(){
+  bulletsSelect.innerHTML = "";
+  BULLET_OPTIONS.forEach(b=>{
+    const opt=document.createElement("option");
+    opt.value=b;
+    opt.textContent = `${b} gloanțe`;
+    bulletsSelect.appendChild(opt);
+  });
+}
+
+function renderAttachments(w){
+  attachmentsList.innerHTML = "";
+  noAttach.checked = false;
+
+  if(!w.attachments || w.attachments.length===0){
+    attachmentsList.innerHTML = `<div class="muted">Această armă nu are atașamente definite.</div>`;
+    return;
+  }
+
+  w.attachments.forEach((a,idx)=>{
+    const div=document.createElement("div");
+    div.className="attach";
+    div.innerHTML = `<label><input type="checkbox" class="attCheck" value="${idx}"> ${a.name}</label>`;
+    attachmentsList.appendChild(div);
+  });
+}
+
+weaponSelect.addEventListener("change", ()=>{
+  const idx = weaponSelect.value;
+  if(idx === "") {
+    attachmentsList.innerHTML="";
+    return;
+  }
+  const w = weapons[Number(idx)];
+  fillBullets();
+  renderAttachments(w);
+});
+
+noAttach.addEventListener("change", ()=>{
+  document.querySelectorAll(".attCheck").forEach(c=>{
+    c.checked = false;
+    c.disabled = noAttach.checked;
+  });
+});
+
+// cost materiale (cum aveai)
+function estimateMaterialsCost(t){
+  let cost = 0;
+  cost += (t.steel||0) * 5000;
+  cost += Math.floor((t.screw||0) / 20) * 5000;
+  cost += (t.polymer||0) * 150;
+  return cost;
+}
+
+function calculate(){
+  const idx = weaponSelect.value;
+  if(idx === "") { alert("Selectează o armă!"); return; }
+
+  const w = weapons[Number(idx)];
+  const qty = Math.max(1, parseInt(document.getElementById("qty").value || "1",10));
+  const bullets = parseInt(bulletsSelect.value || "100",10);
+
+  const totals = emptyTotals();
+  let totalCost = 0;
+
+  // 1) arma (materiale doar la craft)
+  if(w.type === "craft"){
+    Object.keys(w.materials || {}).forEach(k=>{
+      totals[k] = (totals[k]||0) + (w.materials[k]||0)*qty;
+    });
+  }else{
+    totalCost += (w.price || 0) * qty;
+  }
+
+  // 2) gloanțe: EXACT 100/200/250 + interpolare până la 2000
+  const ammoOne = ammoExactInterpolated(w.name, bullets);
+  totals.powder += ammoOne.powder * qty;
+  totalCost += ammoOne.price * qty;
+
+  // 3) atașamente
+  if(!noAttach.checked && w.attachments && w.attachments.length){
+    document.querySelectorAll(".attCheck:checked").forEach(cb=>{
+      const a = w.attachments[Number(cb.value)];
+      if(!a || !a.data) return;
+      Object.keys(a.data).forEach(k=>{
+        totals[k] = (totals[k]||0) + (a.data[k]||0)*qty;
+      });
+    });
+  }
+
+  // 4) cost materiale
+  totalCost += estimateMaterialsCost(totals);
+
+  resultDiv.style.display="block";
+  resultDiv.innerHTML = `
+    <h3>Rezultat</h3>
+    <div><b>Arma:</b> ${w.name}</div>
+    <div><b>Tip:</b> ${w.type === "craft" ? "Craft" : "Pe bani"}</div>
+    <div><b>Arme:</b> ${qty}</div>
+    <div><b>Gloanțe:</b> ${bullets}</div>
+    <hr style="border:1px solid #333">
+
+    <h3>Materiale</h3>
+    Oțel: ${Math.round(totals.steel||0)}<br>
+    Șuruburi: ${Math.round(totals.screw||0)}<br>
+    Țeavă: ${Math.round(totals.barrel||0)}<br>
+    Arc: ${Math.round(totals.spring||0)}<br>
+    Lemn: ${Math.round(totals.wood||0)}<br>
+    Polimer: ${Math.round(totals.polymer||0)}<br>
+    Bec: ${Math.round(totals.bec||0)}<br>
+    Lupă: ${Math.round(totals.lupa||0)}<br>
+    Praf de pușcă: ${Math.round(totals.powder||0)}<br>
+
+    <hr style="border:1px solid #333">
+    <h3>Cost total estimativ</h3>
+    <b>${Math.round(totalCost).toLocaleString()}$</b>
+    <div class="muted" style="margin-top:6px;">
+      Include: preț armă (dacă e pe bani) + preț gloanțe (EXACT 100/200/250, interpolat până la 2000) + materiale (oțel/șuruburi/polimer).
+    </div>
+  `;
+}
+
+calcBtn.addEventListener("click", calculate);
+
+// init
+fillWeapons();
+fillBullets();
+</script>
+
+</body>
+</html>
