@@ -70,6 +70,7 @@ button{
 
 const weapons = {
 
+  // ---------------- PISTOL ----------------
   "PISTOL": {
     type:"craft",
     materials:{steel:8,screw:80,polymer:20},
@@ -81,17 +82,105 @@ const weapons = {
     }
   },
 
+  "COMBATPISTOL": {
+    type:"craft",
+    materials:{steel:10,screw:90,polymer:25},
+    bullets:{100:100,200:200,500:500,1000:1000},
+    attachments:{
+      lanterna:{steel:1,screw:5},
+      amortizor:{steel:2,screw:5},
+      incarcator:{steel:1,screw:5}
+    }
+  },
+
+  // ---------------- SMG ----------------
+  "SMG": {
+    type:"craft",
+    materials:{steel:15,screw:120,polymer:40},
+    bullets:{200:200,500:500,1000:1000},
+    attachments:{
+      lanterna:{steel:1,screw:5},
+      amortizor:{steel:3,screw:5},
+      incarcator_extins:{steel:2,screw:10}
+    }
+  },
+
+  "MICROSMG": {
+    type:"craft",
+    materials:{steel:14,screw:110,polymer:35},
+    bullets:{200:200,500:500,1000:1000},
+    attachments:{
+      lanterna:{steel:1,screw:5},
+      amortizor:{steel:3,screw:5}
+    }
+  },
+
+  // ---------------- RIFLE ----------------
+  "ASSAULTRIFLE": {
+    type:"craft",
+    materials:{steel:25,screw:180,polymer:60},
+    bullets:{200:200,500:500,1000:1000},
+    attachments:{
+      lanterna:{steel:2,screw:5},
+      amortizor:{steel:4,screw:10},
+      incarcator_extins:{steel:3,screw:10}
+    }
+  },
+
+  "CARBINERIFLE": {
+    type:"craft",
+    materials:{steel:28,screw:200,polymer:70},
+    bullets:{200:200,500:500,1000:1000},
+    attachments:{
+      lanterna:{steel:2,screw:5},
+      amortizor:{steel:4,screw:10},
+      incarcator_extins:{steel:3,screw:10}
+    }
+  },
+
+  // ---------------- SHOTGUN ----------------
+  "PUMPSHOTGUN": {
+    type:"craft",
+    materials:{steel:20,screw:150,polymer:40},
+    bullets:{50:50,100:100,200:200},
+    attachments:{
+      lanterna:{steel:1,screw:5}
+    }
+  },
+
+  // ---------------- HEAVY (PE BANI) ----------------
   "HEAVYRIFLE": {
     type:"money",
     price:60000,
     attachments:{
-      lanterna:{steel:1,screw:5},
-      amortizor:{steel:3,screw:5},
-      incarcator:{steel:1,screw:5}
+      lanterna:{steel:2,screw:5},
+      amortizor:{steel:4,screw:10},
+      incarcator_extins:{steel:3,screw:10}
+    }
+  },
+
+  "MINIGUN": {
+    type:"money",
+    price:250000,
+    attachments:{}
+  },
+
+  "RPG": {
+    type:"money",
+    price:300000,
+    attachments:{}
+  },
+
+  "SNIPERRIFLE": {
+    type:"money",
+    price:120000,
+    attachments:{
+      luneta:{steel:3,screw:10}
     }
   }
 
 };
+
 
 const weaponSelect=document.getElementById("weaponSelect");
 const bulletsSelect=document.getElementById("bullets");
