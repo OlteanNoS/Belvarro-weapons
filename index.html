@@ -356,12 +356,8 @@ weaponSelect.addEventListener("change",()=>{
     if(!weapon) return;
 
     if(weapon.type==="craft"){
-        for(let i=100;i<=2000;i+=100){
-    const opt=document.createElement("option");
-    opt.value=i;
-    opt.text=i;
-    bulletsSelect.appendChild(opt);
-}
+       Object.keys(weapon.bullets).forEach(b=>{
+           
             const opt=document.createElement("option"); opt.value=b; opt.text=b;
             bulletsSelect.appendChild(opt);
         });
