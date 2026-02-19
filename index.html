@@ -305,9 +305,18 @@ calcBtn.addEventListener("click",()=>{
 
  let totalCost = 0;
 
- if(weapon.type==="craft"){
-  for(let k in weapon.materials){
-   totals[k]+=weapon.materials[k]*qty;
+const ammo = ammoTypes[weapon.ammoType];
+
+Object.keys(ammo).forEach(b=>{
+ const opt=document.createElement("option");
+ opt.value=b;
+ opt.text=`${b} gloanțe — ${ammo[b].powder} praf — ${ammo[b].price.toLocaleString()}$`;
+ bulletsSelect.appendChild(opt);
+});
+
+setTimeout(()=>showSection(bulletsSection),50);
+setTimeout(()=>showSection(quantitySection),50);
+calcBtn.style.display="block";
   }
 
   totalCost+=totals.steel*5000;
@@ -422,15 +431,17 @@ calcBtn.addEventListener("click",()=>{
     const weapon=weapons[weaponKey];
     const qty=parseInt(document.getElementById("weaponQty").value)||1;
     if(!weapon){showPopup('Selectează o armă!'); return;}
-    const totals={steel:0,screw:0,barrel:0,spring:0,wood:0,polymer:0,powder:0};
+    const totals={steel:0,screw:0,barrel:0,spring:0,wood:0,polymer:0,:0};
 
     if(weapon.type==="craft"){
         for(let k of ["steel","screw","barrel","spring","wood","polymer"])
             totals[k]+=weapon.materials[k]*qty;
 
-     const bulletVal=parseInt(bulletsSelect.value);
-        const bulletPowder=weapon.bullets[bulletVal]||Object.values(weapon.bullets)[0];
-        totals.powder+=bulletPowder*qty;
+    const ammo = ammoTypes[weapon.ammoType];
+const bulletData = ammo[bulletsSelect.value];
+
+totals.powder += bulletData.powder * qty;
+totalCost += bulletData.price * qty;
     }
 
 
@@ -447,7 +458,6 @@ calcBtn.addEventListener("click",()=>{
         totalCost+=Math.floor(totals.screw/20)*5000;
         totalCost+=totals.barrel*4*5000;
         totalCost+=totals.polymer*150;
-        totalCost+=totals.powder*150;
     }else totalCost+=weapon.price*qty;
 
     resultDiv.innerHTML=`<h3>Rezultat</h3>
