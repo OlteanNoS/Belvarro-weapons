@@ -285,25 +285,54 @@ Object.keys(weapons).forEach(w=>{
     weaponSelect.appendChild(opt);
 });
 
-weaponSelect.addEventListener("change",function(){
+weaponSelect.addEventListener("change",()=>{
+    const weapon=weapons[weaponSelect.value];
 
-    const weapon=weapons[this.value];
+    hideSection(bulletsSection);
+    hideSection(attachmentsSection);
+    hideSection(quantitySection);
 
-    bulletsSelect.style.display="none";
+    calcBtn.style.display="none";
+    resultDiv.classList.remove("show");
+
     bulletsSelect.innerHTML="";
-    attachmentsDiv.innerHTML="";
+    attachmentList.innerHTML="";
+    document.getElementById("noAttach").checked=false;
 
     if(!weapon) return;
 
-    if(weapon.type==="craft"){
-        bulletsSelect.style.display="block";
+    // ✅ Afișăm gloanțe dacă există
+    if(weapon.bullets){
         Object.keys(weapon.bullets).forEach(b=>{
-            let opt=document.createElement("option");
+            const opt=document.createElement("option");
             opt.value=b;
-            opt.textContent=b+" gloanțe";
+            opt.text=b;
             bulletsSelect.appendChild(opt);
         });
+
+        setTimeout(()=>showSection(bulletsSection),50);
     }
+
+    // ✅ Afișăm atașamente dacă există
+    if(weapon.attachments){
+        attachmentList.innerHTML="";
+        const keys=Object.keys(weapon.attachments);
+
+        keys.forEach((att,i)=>{
+            const lbl=document.createElement("label");
+            lbl.className="attachStep";
+            lbl.innerHTML=`<input type="checkbox" class="attachCheck" value="${att}"> ${att}`;
+            attachmentList.appendChild(lbl);
+
+            setTimeout(()=>lbl.classList.add("show"), i*100);
+        });
+
+        setTimeout(()=>showSection(attachmentsSection),100);
+    }
+
+    setTimeout(()=>showSection(quantitySection),150);
+    calcBtn.style.display="block";
+});
 
     if(weapon.attachments){
         Object.keys(weapon.attachments).forEach(att=>{
