@@ -2,374 +2,191 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<title>FiveM Armes Craft Calculator</title>
+<title>Weapon Calculator</title>
+
 <style>
-body {
-    margin:0;
-    font-family: Arial;
+body{
     background:#111;
     color:white;
+    font-family:Arial;
     display:flex;
     justify-content:center;
-    padding:20px;
+    padding:40px;
 }
-.container {
-    background: rgba(0,0,0,0.95);
+.container{
+    background:#1e1e1e;
     padding:30px;
-    width:1000px;
     border-radius:10px;
-    transition:all 0.3s;
+    width:500px;
 }
-.field {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-}
-.field label {
-    width: 200px;
-    margin-right: 15px;
-}
-.field select, .field input {
-    flex: 1;
+select,input{
+    width:100%;
     padding:8px;
-    font-size:14px;
-    border-radius:5px;
-    border:1px solid #444;
+    margin:10px 0;
     background:#222;
     color:white;
-    transition:0.3s;
+    border:1px solid #444;
 }
-.field select:hover, .field input:hover { background:#333; }
-.field select:focus, .field input:focus { outline:none; border-color:#2ecc71; }
-button {
-    cursor:pointer;
+button{
+    width:100%;
+    padding:10px;
     background:#2ecc71;
     border:none;
     color:white;
     font-weight:bold;
-    padding:10px;
-    margin-top:15px;
-    transition:0.3s;
+    cursor:pointer;
 }
-button:hover {background:#27ae60;}
-.result {
+.result{
     margin-top:20px;
     padding:15px;
     background:#222;
-    border-radius:8px;
-    transition:all 0.5s;
-    transform: translateY(-20px);
-    opacity:0;
+    border-radius:6px;
 }
-.result.show { opacity:1; transform: translateY(0); }
-h3 {margin:10px 0 5px 0;}
-.attachStep {
-    display:flex;
-    align-items:center;
-    margin:5px 0;
-    opacity:0;
-    transform:translateX(-20px);
-    transition: all 0.4s;
-}
-.attachStep.show { opacity:1; transform:translateX(0); }
-.attachStep input[type="checkbox"] {
-    margin-right:10px;
-    width:18px;
-    height:18px;
-    accent-color:#2ecc71;
-    cursor:pointer;
-}
-.attachStep input[type="checkbox"]:hover { transform: scale(1.2); transition:0.2s; }
-section {
-    overflow:hidden;
-    max-height:0;
-    opacity:0;
-    transition:max-height 0.5s ease-out, opacity 0.3s;
-}
-section.show {max-height:500px; opacity:1;}
-.popup {
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.7);
-    display:flex; justify-content:center; align-items:center;
-    opacity:0; transform:translateY(50px);
-    transition:all 0.4s; pointer-events:none;
-}
-.popup.show { opacity:1; transform:translateY(0); pointer-events:auto; }
-.popupContent {
-    background:#222;
-    padding:20px;
-    border-radius:10px;
-    color:white;
-    min-width:300px;
-}
-.popupContent button {margin-top:10px; cursor:pointer;}
 </style>
 </head>
+
 <body>
 <div class="container">
-<h3>Ce vrei să craftezi?</h3>
-<div class="field">
-<label for="weaponSelect">Arma:</label>
-<select id="weaponSelect"><option value="">-- Selectează arma --</option></select>
-</div>
 
-<section id="bulletsSection">
-<div class="field">
-<label for="bullets">Gloanțe:</label>
-<select id="bullets"></select>
-</div>
-</section>
+<h2>Weapon Calculator</h2>
 
-<section id="attachmentsSection">
-<h3>Atașamente</h3>
-<label><input type="checkbox" id="noAttach"> Nu vreau atașamente</label>
-<div id="attachmentList"></div>
-</section>
+<select id="weaponSelect">
+<option value="">-- Selectează arma --</option>
+</select>
 
-<section id="quantitySection">
-<div class="field">
-<label for="weaponQty">Număr arme:</label>
-<input type="number" id="weaponQty" min="1" value="1">
-</div>
-</section>
+<select id="bullets" style="display:none;"></select>
 
-<button id="calcBtn" style="display:none;">Calculează</button>
+<input type="number" id="qty" value="1" min="1" placeholder="Număr arme">
+
+<div id="attachments"></div>
+
+<button onclick="calculate()">Calculează</button>
+
 <div id="result" class="result"></div>
+
 </div>
 
-<div class="popup" id="popup">
-<div class="popupContent">
-<p id="popupText"></p>
-<button onclick="document.getElementById('popup').classList.remove('show')">OK</button>
-</div>
-</div>
 <script>
-// ==================== DATELE ARME ====================
 
 const weapons = {
-  // ================= ARME CRAFT =================
+
   "PISTOL": {
     type:"craft",
-    materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
-    bullets:{100:100,200:200,250:250,300:300,400:400,500:500,600:600,700:700,800:800,1000:1000,1250:1250,1500:1500,2000:2000},
+    materials:{steel:8,screw:80,polymer:20},
+    bullets:{100:100,200:200,500:500,1000:1000},
     attachments:{
-      lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
-      amortizor:{steel:2,screw:5,polymer:2},
-      incarcator:{steel:1,screw:5,arc:1,polymer:1}
-    }
-  },
-  "COMBAT PISTOL":{
-    type:"craft",
-    materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},
-    bullets:{100:100,200:200,250:250,300:300,400:400,500:500,600:600,700:700,800:800,1000:1000,1250:1250,1500:1500,2000:2000},
-    attachments:{
-      lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
-      amortizor:{steel:2,screw:5,polymer:2},
-      incarcator:{steel:1,screw:5,arc:1,polymer:1}
-    }
-  },
-  "PISTOL MK2":{
-    type:"craft",
-    materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
-    bullets:{100:130,200:260,250:325,300:390,400:520,500:650,600:780,700:910,800:1040,1000:1300,1250:1625,1500:1950,2000:2600},
-    attachments:{
-      lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
-      amortizor:{steel:2,screw:5,polymer:2},
-      incarcator:{steel:1,screw:5,arc:1,polymer:1},
-      mounted_scope:{steel:2,screw:10,polymer:2,lupa:1}
-    }
-  },
-  "CERAMIC PISTOL":{
-    type:"craft",
-    materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:18},
-    bullets:{100:130,200:260,250:325,300:390,400:520,500:650,600:780,700:910,800:1040,1000:1300,1250:1625,1500:1950,2000:2600},
-    attachments:{
-      lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
-      amortizor:{steel:2,screw:5,polymer:2},
-      incarcator:{steel:1,screw:5,arc:1,polymer:1}
-    }
-  },
-  "PISTOL WM29 (XM3)":{
-    type:"craft",
-    materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
-    bullets:{100:130,200:260,250:325,300:390,400:520,500:650,600:780,700:910,800:1040,1000:1300,1250:1625,1500:1950,2000:2600},
-    attachments:{
-      lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
-      amortizor:{steel:2,screw:5,polymer:2},
-      incarcator:{steel:1,screw:5,arc:1,polymer:1}
+      lanterna:{steel:1,screw:5},
+      amortizor:{steel:2,screw:5},
+      incarcator:{steel:1,screw:5}
     }
   },
 
-  // ================= ARME PE BANI =================
-  "VINTIGE PISTOL":{type:"money",price:25000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:2,screw:5,polymer:2}}},
-  "HEAVYRIFLE":{type:"money",price:60000,attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:3,screw:5,polymer:3},incarcator:{steel:1,screw:5,arc:1,polymer:1},grip:{steel:1,screw:5,arc:1,polymer:0}}}},
-  "COMBAT MG":{type:"money",price:120000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:3,screw:5,polymer:3},lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},grip:{steel:1,screw:5,arc:1,polymer:0}}}}
+  "HEAVYRIFLE": {
+    type:"money",
+    price:60000,
+    attachments:{
+      lanterna:{steel:1,screw:5},
+      amortizor:{steel:3,screw:5},
+      incarcator:{steel:1,screw:5}
+    }
+  }
+
 };
-<script>
-// ================= REFERINȚE ELEMENTE =================
-const weaponSelect = document.getElementById("weaponSelect");
-const bulletsSection = document.getElementById("bulletsSection");
-const bulletsSelect = document.getElementById("bullets");
-const attachmentsSection = document.getElementById("attachmentsSection");
-const attachmentList = document.getElementById("attachmentList");
-const quantitySection = document.getElementById("quantitySection");
-const calcBtn = document.getElementById("calcBtn");
-const resultDiv = document.getElementById("result");
 
-function showSection(section){
-  section.classList.add("show");
-}
+const weaponSelect=document.getElementById("weaponSelect");
+const bulletsSelect=document.getElementById("bullets");
+const attachmentsDiv=document.getElementById("attachments");
 
-function hideSection(section){
-  section.classList.remove("show");
-}
-
-function showPopup(text){
-  document.getElementById("popupText").innerText = text;
-  document.getElementById("popup").classList.add("show");
-}
-
-// ================= POPULARE ARME =================
 Object.keys(weapons).forEach(w=>{
-  const opt = document.createElement("option");
-  opt.value = w;
-  opt.textContent = w;
-  weaponSelect.appendChild(opt);
+    let opt=document.createElement("option");
+    opt.value=w;
+    opt.textContent=w;
+    weaponSelect.appendChild(opt);
 });
 
-// ================= SELECT ARMĂ =================
-weaponSelect.addEventListener("change",()=>{
-  const weapon = weapons[weaponSelect.value];
+weaponSelect.addEventListener("change",function(){
 
-  attachmentList.innerHTML="";
-  bulletsSelect.innerHTML="";
-  resultDiv.classList.remove("show");
-  hideSection(attachmentsSection);
-  hideSection(quantitySection);
-  hideSection(bulletsSection);
-  calcBtn.style.display="none";
+    const weapon=weapons[this.value];
 
-  if(!weapon) return;
+    bulletsSelect.style.display="none";
+    bulletsSelect.innerHTML="";
+    attachmentsDiv.innerHTML="";
 
-  // Dacă este craft → afișează gloanțe
-  if(weapon.type === "craft"){
-    Object.keys(weapon.bullets).forEach(b=>{
-      const opt = document.createElement("option");
-      opt.value = b;
-      opt.textContent = b + " gloanțe";
-      bulletsSelect.appendChild(opt);
-    });
-    showSection(bulletsSection);
-  } else {
-    // Dacă este money → nu are gloanțe
-    showSection(quantitySection);
-    showSection(attachmentsSection);
-    calcBtn.style.display="block";
-  }
+    if(!weapon) return;
 
-  // Atașamente
-  if(weapon.attachments){
-    let i=0;
-    const keys = Object.keys(weapon.attachments);
-
-    function addNext(){
-      if(i>=keys.length) return;
-      const att = keys[i];
-      const lbl = document.createElement("label");
-      lbl.className="attachStep";
-      lbl.innerHTML=`<input type="checkbox" class="attachCheck" value="${att}"> ${att}`;
-      attachmentList.appendChild(lbl);
-
-      setTimeout(()=>{
-        lbl.classList.add("show");
-        addNext();
-      },100);
-
-      i++;
+    if(weapon.type==="craft"){
+        bulletsSelect.style.display="block";
+        Object.keys(weapon.bullets).forEach(b=>{
+            let opt=document.createElement("option");
+            opt.value=b;
+            opt.textContent=b+" gloanțe";
+            bulletsSelect.appendChild(opt);
+        });
     }
 
-    showSection(attachmentsSection);
-    addNext();
-  }
+    if(weapon.attachments){
+        Object.keys(weapon.attachments).forEach(att=>{
+            attachmentsDiv.innerHTML+=
+            `<label>
+                <input type="checkbox" value="${att}">
+                ${att}
+            </label><br>`;
+        });
+    }
+
 });
 
-// ================= SELECT GLOANȚE =================
-bulletsSelect.addEventListener("change",()=>{
-  showSection(quantitySection);
-  calcBtn.style.display="block";
-});
+function calculate(){
 
-// ================= CALCUL =================
-calcBtn.addEventListener("click",()=>{
+    const weapon=weapons[weaponSelect.value];
+    const qty=parseInt(document.getElementById("qty").value)||1;
 
-  const weapon = weapons[weaponSelect.value];
-  const qty = parseInt(document.getElementById("weaponQty").value) || 1;
+    if(!weapon){
+        alert("Selectează o armă!");
+        return;
+    }
 
-  if(!weapon){
-    showPopup("Selectează o armă!");
-    return;
-  }
+    let steel=0;
+    let screw=0;
+    let polymer=0;
+    let powder=0;
+    let totalCost=0;
 
-  const totals = {
-    steel:0,
-    screw:0,
-    barrel:0,
-    spring:0,
-    wood:0,
-    polymer:0,
-    powder:0
-  };
+    if(weapon.type==="craft"){
+        steel+=weapon.materials.steel*qty;
+        screw+=weapon.materials.screw*qty;
+        polymer+=weapon.materials.polymer*qty;
 
-  // ===== MATERIALE ARMĂ =====
-  if(weapon.type === "craft"){
+        const bullets=parseInt(bulletsSelect.value);
+        powder+=weapon.bullets[bullets]*qty;
 
-    Object.keys(weapon.materials).forEach(mat=>{
-      totals[mat] += weapon.materials[mat] * qty;
+        totalCost+=steel*5000;
+        totalCost+=Math.floor(screw/20)*5000;
+        totalCost+=polymer*150;
+        totalCost+=powder*150;
+    }
+
+    if(weapon.type==="money"){
+        totalCost+=weapon.price*qty;
+    }
+
+    document.querySelectorAll("#attachments input:checked").forEach(box=>{
+        const data=weapon.attachments[box.value];
+        steel+= (data.steel||0)*qty;
+        screw+= (data.screw||0)*qty;
     });
 
-    const bulletQty = parseInt(bulletsSelect.value);
-    const powderNeeded = weapon.bullets[bulletQty] || 0;
-    totals.powder += powderNeeded * qty;
-  }
+    document.getElementById("result").innerHTML=
+    `
+    Oțel: ${steel}<br>
+    Șuruburi: ${screw}<br>
+    Polimer: ${polymer}<br>
+    Praf de pușcă: ${powder}<br><br>
+    <strong>Cost total: ${totalCost}$</strong>
+    `;
+}
 
-  // ===== ATAȘAMENTE =====
-  document.querySelectorAll(".attachCheck:checked").forEach(att=>{
-    const data = weapon.attachments[att.value];
-    if(!data) return;
-
-    Object.keys(data).forEach(mat=>{
-      if(totals[mat] !== undefined){
-        totals[mat] += data[mat] * qty;
-      }
-    });
-  });
-
-  // ===== CALCUL COST =====
-  let totalCost = 0;
-
-  if(weapon.type === "craft"){
-    totalCost += totals.steel * 5000;
-    totalCost += Math.floor(totals.screw / 20) * 5000;
-    totalCost += totals.barrel * 4 * 5000;
-    totalCost += totals.polymer * 150;
-    totalCost += totals.powder * 150;
-  } else {
-    totalCost += weapon.price * qty;
-  }
-
-  // ===== AFIȘARE =====
-  resultDiv.innerHTML = `
-    <h3>Rezultat</h3>
-    Oțel: ${totals.steel}<br>
-    Șuruburi: ${totals.screw}<br>
-    Țevi: ${totals.barrel}<br>
-    Arcuri: ${totals.spring}<br>
-    Lemn: ${totals.wood}<br>
-    Polimer: ${totals.polymer}<br>
-    Praf de pușcă: ${totals.powder}<br><br>
-    <strong>Cost total: ${totalCost.toLocaleString()} $</strong>
-  `;
-
-  resultDiv.classList.add("show");
-});
 </script>
+
+</body>
+</html>
