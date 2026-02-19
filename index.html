@@ -70,156 +70,206 @@ button{
 
 const weapons = {
 
-// ===================== PISTOLS =====================
-
+// ================= PISTOLS =================
 "PISTOL":{
 type:"craft",
 materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
-bullets:{
-100:{powder:100,price:5400},
-200:{powder:200,price:10700},
-250:{powder:250,price:13400}
-},
+bullets:{100:100,200:200,250:250,300:300,400:400,500:500,1000:1000,2000:2000},
 attachments:{
-"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
-"Amortizor":{steel:2,screw:5,polymer:2},
-"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
 }
 },
 
 "COMBAT PISTOL":{
 type:"craft",
 materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},
-bullets:{
-100:{powder:100,price:5400},
-200:{powder:200,price:10700},
-250:{powder:250,price:13400}
-},
+bullets:{100:100,200:200,250:250,300:300,400:400,500:500,1000:1000,2000:2000},
 attachments:{
-"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
-"Amortizor":{steel:2,screw:5,polymer:2},
-"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
 }
 },
 
 "PISTOL MK2":{
 type:"craft",
 materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
-bullets:{
-100:{powder:130,price:7000},
-200:{powder:260,price:13900},
-250:{powder:325,price:17400}
-},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
 attachments:{
-"Încărcător":{steel:1,screw:5,spring:1,polymer:1},
-"Mounted-Scope":{steel:2,screw:10,polymer:2,lupa:1},
-"Amortizor":{steel:2,screw:5,polymer:2},
-"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
 }
 },
 
 "CERAMIC PISTOL":{
 type:"craft",
 materials:{steel:9,screw:91,barrel:0,spring:0,wood:0,polymer:18},
-bullets:{
-100:{powder:130,price:7000},
-200:{powder:260,price:13900},
-250:{powder:325,price:17400}
-},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
 attachments:{
-"Amortizor":{steel:2,screw:5,polymer:2},
-"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
 }
 },
 
 "PISTOL WM29 (XM3)":{
 type:"craft",
 materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
-bullets:{
-100:{powder:130,price:7000},
-200:{powder:260,price:13900},
-250:{powder:325,price:17400}
-},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
 attachments:{
-"Amortizor":{steel:2,screw:5,polymer:2}
+amortizor:{steel:2,screw:5,polymer:2}
 }
 },
 
-// ===================== SMG =====================
-
+// ================= SMG =================
 "MICRO SMG":{
 type:"craft",
 materials:{steel:15,screw:95,barrel:0,spring:1,wood:0,polymer:42},
-bullets:{
-100:{powder:150,price:8000},
-200:{powder:300,price:16000},
-250:{powder:375,price:20000}
-},
+bullets:{100:150,200:300,250:375,300:450,400:600,500:750,1000:1500,2000:3000},
 attachments:{
-"Lunetă":{steel:2,screw:10,polymer:2,lupa:1},
-"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
-"Amortizor":{steel:3,screw:5,polymer:3},
-"Încărcător":{steel:2,screw:10,spring:1,polymer:2}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
 }
 },
 
-"MACHINE PISTOL (Tec9)":{
+"SMG":{
 type:"craft",
-materials:{steel:12,screw:100,barrel:0,spring:1,wood:0,polymer:38},
-bullets:{
-100:{powder:150,price:8000},
-200:{powder:300,price:16000},
-250:{powder:375,price:20000}
-},
+materials:{steel:13,screw:105,barrel:0,spring:1,wood:0,polymer:48},
+bullets:{100:180,200:360,250:450,300:540,400:720,500:900,1000:1800,2000:3600},
 attachments:{
-"Amortizor":{steel:2,screw:5,polymer:2},
-"Încărcător":{steel:2,screw:8,spring:1,polymer:2}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
 }
 },
 
-"MINI SMG":{
+"COMBAT PDW":{
 type:"craft",
-materials:{steel:11,screw:97,barrel:0,spring:1,wood:0,polymer:36},
-bullets:{
-100:{powder:150,price:8000},
-200:{powder:300,price:16000},
-250:{powder:375,price:20000}
-},
+materials:{steel:14,screw:110,barrel:0,spring:1,wood:0,polymer:50},
+bullets:{100:180,200:360,250:450,300:540,400:720,500:900,1000:1800,2000:3600},
 attachments:{
-"Încărcător":{steel:2,screw:10,spring:1,polymer:2}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
 }
 },
 
-// ===================== RIFLES =====================
-
+// ================= RIFLES =================
 "ASSAULT RIFLE (AK)":{
 type:"craft",
-materials:{steel:21,screw:135,barrel:1,spring:2,wood:0,polymer:68},
-bullets:{
-100:{powder:250,price:13400},
-200:{powder:500,price:26700},
-250:{powder:625,price:33400}
-},
+materials:{steel:21,screw:135,barrel:1,spring:1,wood:0,polymer:68},
+bullets:{100:250,200:500,250:625,300:750,400:1000,500:1250,1000:2500,2000:5000},
 attachments:{
-"Lunetă":{steel:2,screw:10,polymer:2,lupa:1},
-"Baterie-Gloante":{steel:3,screw:20,spring:1,polymer:3},
-"Amortizor":{steel:3,screw:5,polymer:3},
-"Încărcător":{steel:2,screw:5,spring:1,polymer:2},
-"Grip":{steel:1,screw:5,polymer:1},
-"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1}
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
 }
 },
 
-// ===================== MONEY WEAPONS =====================
+"CARABINE RIFLE":{
+type:"craft",
+materials:{steel:18,screw:140,barrel:1,spring:1,wood:0,polymer:72},
+bullets:{100:300,200:600,250:750,300:900,400:1200,500:1500,1000:3000,2000:6000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
 
-"Navy Pistol":{type:"money",price:400000,attachments:{}},
-"VINTIGE PISTOL":{type:"money",price:25000,attachments:{}},
-"DB":{type:"money",price:250000,attachments:{}},
-"ASSAULTRIFE MK2 (AK)":{type:"money",price:70000,attachments:{}},
-"HEAVYRIFLE":{type:"money",price:60000,attachments:{}},
-"COMBAT MG":{type:"money",price:120000,attachments:{}},
-"GUSENBERG":{type:"money",price:45000,attachments:{}},
-"MG":{type:"money",price:90000,attachments:{}}
+"ADVANCED RIFLE":{
+type:"craft",
+materials:{steel:18,screw:145,barrel:1,spring:1,wood:0,polymer:78},
+bullets:{100:300,200:600,250:750,300:900,400:1200,500:1500,1000:3000,2000:6000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+// ================= MONEY WEAPONS =================
+"VINTAGE PISTOL":{
+type:"money",
+price:25000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:2,screw:5,polymer:2}
+}
+},
+
+"NAVY PISTOL":{
+type:"money",
+price:400000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:2,screw:5,polymer:2}
+}
+},
+
+"DB":{
+type:"money",
+price:250000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"ASSAULTRIFLE MK2":{
+type:"money",
+price:70000,
+attachments:{
+incarcator:{steel:2,screw:5,arc:1,polymer:1},
+amortizor:{steel:3,screw:5,polymer:2},
+scope:{steel:2,screw:12}
+}
+},
+
+"HEAVYRIFLE":{
+type:"money",
+price:60000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:3,screw:5,polymer:2},
+scope:{steel:2,screw:10},
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}
+}
+},
+
+"COMBAT MG":{
+type:"money",
+price:120000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:12},
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}
+}
+},
+
+"GUSENBERG":{
+type:"money",
+price:45000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"MG":{
+type:"money",
+price:90000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+}
 
 };
 
