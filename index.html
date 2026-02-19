@@ -170,10 +170,158 @@ section.show {max-height:500px;opacity:1;}
 
 <script>
 // ==================== DATELE ARME ====================
-const weapons={
-"PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
-"COMBAT PISTOL":{type:"craft",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
-"VINTAGE PISTOL":{type:"money",price:25000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:2,screw:5,polymer:2}}}
+const weapons = {
+// ===================== PISTOLS =====================
+
+"PISTOL":{
+type:"craft",
+materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
+bullets:{
+100:{powder:100,price:5400},
+200:{powder:200,price:10700},
+250:{powder:250,price:13400}
+},
+attachments:{
+"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
+"Amortizor":{steel:2,screw:5,polymer:2},
+"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+}
+},
+
+"COMBAT PISTOL":{
+type:"craft",
+materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},
+bullets:{
+100:{powder:100,price:5400},
+200:{powder:200,price:10700},
+250:{powder:250,price:13400}
+},
+attachments:{
+"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
+"Amortizor":{steel:2,screw:5,polymer:2},
+"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+}
+},
+
+"PISTOL MK2":{
+type:"craft",
+materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
+bullets:{
+100:{powder:130,price:7000},
+200:{powder:260,price:13900},
+250:{powder:325,price:17400}
+},
+attachments:{
+"Încărcător":{steel:1,screw:5,spring:1,polymer:1},
+"Mounted-Scope":{steel:2,screw:10,polymer:2,lupa:1},
+"Amortizor":{steel:2,screw:5,polymer:2},
+"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1}
+}
+},
+
+"CERAMIC PISTOL":{
+type:"craft",
+materials:{steel:9,screw:91,barrel:0,spring:0,wood:0,polymer:18},
+bullets:{
+100:{powder:130,price:7000},
+200:{powder:260,price:13900},
+250:{powder:325,price:17400}
+},
+attachments:{
+"Amortizor":{steel:2,screw:5,polymer:2},
+"Încărcător":{steel:1,screw:5,spring:1,polymer:1}
+}
+},
+
+"PISTOL WM29 (XM3)":{
+type:"craft",
+materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
+bullets:{
+100:{powder:130,price:7000},
+200:{powder:260,price:13900},
+250:{powder:325,price:17400}
+},
+attachments:{
+"Amortizor":{steel:2,screw:5,polymer:2}
+}
+},
+
+// ===================== SMG =====================
+
+"MICRO SMG":{
+type:"craft",
+materials:{steel:15,screw:95,barrel:0,spring:1,wood:0,polymer:42},
+bullets:{
+100:{powder:150,price:8000},
+200:{powder:300,price:16000},
+250:{powder:375,price:20000}
+},
+attachments:{
+"Lunetă":{steel:2,screw:10,polymer:2,lupa:1},
+"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1},
+"Amortizor":{steel:3,screw:5,polymer:3},
+"Încărcător":{steel:2,screw:10,spring:1,polymer:2}
+}
+},
+
+"MACHINE PISTOL (Tec9)":{
+type:"craft",
+materials:{steel:12,screw:100,barrel:0,spring:1,wood:0,polymer:38},
+bullets:{
+100:{powder:150,price:8000},
+200:{powder:300,price:16000},
+250:{powder:375,price:20000}
+},
+attachments:{
+"Amortizor":{steel:2,screw:5,polymer:2},
+"Încărcător":{steel:2,screw:8,spring:1,polymer:2}
+}
+},
+
+"MINI SMG":{
+type:"craft",
+materials:{steel:11,screw:97,barrel:0,spring:1,wood:0,polymer:36},
+bullets:{
+100:{powder:150,price:8000},
+200:{powder:300,price:16000},
+250:{powder:375,price:20000}
+},
+attachments:{
+"Încărcător":{steel:2,screw:10,spring:1,polymer:2}
+}
+},
+
+// ===================== RIFLES =====================
+
+"ASSAULT RIFLE (AK)":{
+type:"craft",
+materials:{steel:21,screw:135,barrel:1,spring:2,wood:0,polymer:68},
+bullets:{
+100:{powder:250,price:13400},
+200:{powder:500,price:26700},
+250:{powder:625,price:33400}
+},
+attachments:{
+"Lunetă":{steel:2,screw:10,polymer:2,lupa:1},
+"Baterie-Gloante":{steel:3,screw:20,spring:1,polymer:3},
+"Amortizor":{steel:3,screw:5,polymer:3},
+"Încărcător":{steel:2,screw:5,spring:1,polymer:2},
+"Grip":{steel:1,screw:5,polymer:1},
+"Lanternă":{steel:1,screw:5,polymer:1,bec:1,lupa:1}
+}
+},
+
+// ===================== MONEY WEAPONS =====================
+
+"Navy Pistol":{type:"money",price:400000,attachments:{}},
+"VINTIGE PISTOL":{type:"money",price:25000,attachments:{}},
+"DB":{type:"money",price:250000,attachments:{}},
+"ASSAULTRIFE MK2 (AK)":{type:"money",price:70000,attachments:{}},
+"HEAVYRIFLE":{type:"money",price:60000,attachments:{}},
+"COMBAT MG":{type:"money",price:120000,attachments:{}},
+"GUSENBERG":{type:"money",price:45000,attachments:{}},
+"MG":{type:"money",price:90000,attachments:{}}
+
 };
 
 // ==================== ELEMENTE UI ====================
