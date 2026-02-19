@@ -408,9 +408,14 @@ calcBtn.addEventListener("click",()=>{
         for(let k of ["steel","screw","barrel","spring","wood","polymer"])
             totals[k]+=weapon.materials[k]*qty;
 
-        const bulletVal=parseInt(bulletsSelect.value);
-        const bulletPowder=weapon.bullets[bulletVal]||Object.values(weapon.bullets)[0];
-        totals.powder+=bulletPowder*qty;
+       const bulletVal=parseInt(bulletsSelect.value)||100;
+
+let base=weapon.bullets[100] || {powder:100,price:5400};
+let multiplier=bulletVal/100;
+
+totals.powder+=Math.round(base.powder*multiplier)*qty;
+totalCost+=Math.round(base.price*multiplier)*qty;
+
     }
 
     document.querySelectorAll(".attachCheck:checked").forEach(att=>{
