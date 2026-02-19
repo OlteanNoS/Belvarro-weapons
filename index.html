@@ -356,7 +356,17 @@ weaponSelect.addEventListener("change",()=>{
     if(!weapon) return;
 
     if(weapon.type==="craft"){
-       Object.keys(weapon.bullets).forEach(b=>{
+       if(weapon.bullets){
+    bulletsSelect.innerHTML="";
+    for(let i=100;i<=2000;i+=100){
+        const opt=document.createElement("option");
+        opt.value=i;
+        opt.text=i+" gloanțe";
+        bulletsSelect.appendChild(opt);
+    }
+    setTimeout(()=>showSection(bulletsSection),50);
+}
+
            
             const opt=document.createElement("option"); opt.value=b; opt.text=b;
             bulletsSelect.appendChild(opt);
@@ -396,6 +406,90 @@ document.getElementById("noAttach").addEventListener("change",function(){
 
 // ==================== CALCUL ====================
 calcBtn.addEventListener("click",()=>{
+
+const weaponKey=weaponSelect.value;
+const weapon=weapons[weaponKey];
+const qty=parseInt(document.getElementById("weaponQty").value)||1;
+
+if(!weapon){
+    showPopup('Selectează o armă!');
+    return;
+}
+
+let totals={
+steel:0,
+screw:0,
+barrel:0,
+spring:0,
+wood:0,
+polymer:0,
+powder:0,
+bec:0,
+lupa:0
+};
+
+let totalCost=0;
+
+// ================= WEAPON =================
+if(weapon.type==="craft"){
+    Object.keys(weapon.materials).forEach(k=>{
+        totals[k]+= (weapon.materials[k]||0)*qty;
+    });
+}
+
+// ================= BULLETS =================
+if(weapon.bullets){
+    const bulletQty=parseInt(bulletsSelect.value)||100;
+
+    const base=weapon.bullets[100];
+    const multiplier=bulletQty/100;
+
+    totals.powder+=Math.round(base.powder*multiplier)*qty;
+    totalCost+=Math.round(base.price*multiplier)*qty;
+}
+
+// ================= ATTACHMENTS =================
+document.querySelectorAll(".attachCheck:checked").forEach(att=>{
+    const data=weapon.attachments[att.value];
+    if(!data) return;
+
+    Object.keys(data).forEach(k=>{
+        totals[k]=(totals[k]||0)+(data[k]*qty);
+    });
+});
+
+// ================= MONEY WEAPON =================
+if(weapon.type==="money"){
+    totalCost+=weapon.price*qty;
+}
+
+// ================= MATERIAL COST =================
+if(weapon.type==="craft"){
+    totalCost+=totals.steel*5000;
+    totalCost+=Math.floor(totals.screw/20)*5000;
+    totalCost+=totals.barrel*4*5000;
+    totalCost+=totals.polymer*150;
+}
+
+// ================= RESULT =================
+resultDiv.innerHTML=`
+<h3>Rezultat</h3>
+Oțel: ${totals.steel}<br>
+Șurub: ${totals.screw}<br>
+Țeavă: ${totals.barrel}<br>
+Arc: ${totals.spring}<br>
+Polimer: ${totals.polymer}<br>
+Bec: ${totals.bec}<br>
+Lupă: ${totals.lupa}<br>
+Praf de pușcă: ${totals.powder}<br>
+<br>
+<strong>Cost total estimativ: ${totalCost.toLocaleString()}$</strong>
+`;
+
+resultDiv.classList.add("show");
+
+});
+
     const weaponKey=weaponSelect.value;
     const weapon=weapons[weaponKey];
     const qty=parseInt(document.getElementById("weaponQty").value)||1;
