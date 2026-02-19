@@ -170,11 +170,211 @@ section.show {max-height:500px;opacity:1;}
 
 <script>
 // ==================== DATELE ARME ====================
-const weapons={
-"PISTOL":{type:"craft",materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
-"COMBAT PISTOL":{type:"craft",materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},bullets:{100:100,200:200,250:250},attachments:{lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},amortizor:{steel:2,screw:5,polymer:2},incarcator:{steel:1,screw:5,arc:1,polymer:1}}},
-"VINTAGE PISTOL":{type:"money",price:25000,attachments:{incarcator:{steel:1,screw:5,arc:1,polymer:1},amortizor:{steel:2,screw:5,polymer:2}}}
+const weapons = {
+
+// ================= PISTOLS =================
+"PISTOL":{
+type:"craft",
+materials:{steel:8,screw:80,barrel:0,spring:1,wood:0,polymer:20},
+bullets:{100:100,200:200,250:250,300:300,400:400,500:500,1000:1000,2000:2000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"COMBAT PISTOL":{
+type:"craft",
+materials:{steel:8,screw:85,barrel:0,spring:0,wood:0,polymer:18},
+bullets:{100:100,200:200,250:250,300:300,400:400,500:500,1000:1000,2000:2000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"PISTOL MK2":{
+type:"craft",
+materials:{steel:9,screw:91,barrel:0,spring:1,wood:0,polymer:22},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+"CERAMIC PISTOL":{
+type:"craft",
+materials:{steel:9,screw:91,barrel:0,spring:0,wood:0,polymer:18},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
+attachments:{
+amortizor:{steel:2,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"PISTOL WM29 (XM3)":{
+type:"craft",
+materials:{steel:10,screw:95,barrel:0,spring:1,wood:0,polymer:20},
+bullets:{100:130,200:260,250:325,300:390,400:520,500:650,1000:1300,2000:2600},
+attachments:{
+amortizor:{steel:2,screw:5,polymer:2}
+}
+},
+
+// ================= SMG =================
+"MICRO SMG":{
+type:"craft",
+materials:{steel:15,screw:95,barrel:0,spring:1,wood:0,polymer:42},
+bullets:{100:150,200:300,250:375,300:450,400:600,500:750,1000:1500,2000:3000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+"SMG":{
+type:"craft",
+materials:{steel:13,screw:105,barrel:0,spring:1,wood:0,polymer:48},
+bullets:{100:180,200:360,250:450,300:540,400:720,500:900,1000:1800,2000:3600},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+"COMBAT PDW":{
+type:"craft",
+materials:{steel:14,screw:110,barrel:0,spring:1,wood:0,polymer:50},
+bullets:{100:180,200:360,250:450,300:540,400:720,500:900,1000:1800,2000:3600},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+incarcator:{steel:2,screw:10,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+// ================= RIFLES =================
+"ASSAULT RIFLE (AK)":{
+type:"craft",
+materials:{steel:21,screw:135,barrel:1,spring:1,wood:0,polymer:68},
+bullets:{100:250,200:500,250:625,300:750,400:1000,500:1250,1000:2500,2000:5000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:2,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+"CARABINE RIFLE":{
+type:"craft",
+materials:{steel:18,screw:140,barrel:1,spring:1,wood:0,polymer:72},
+bullets:{100:300,200:600,250:750,300:900,400:1200,500:1500,1000:3000,2000:6000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+"ADVANCED RIFLE":{
+type:"craft",
+materials:{steel:18,screw:145,barrel:1,spring:1,wood:0,polymer:78},
+bullets:{100:300,200:600,250:750,300:900,400:1200,500:1500,1000:3000,2000:6000},
+attachments:{
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1},
+amortizor:{steel:3,screw:5,polymer:2},
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:10}
+}
+},
+
+// ================= MONEY WEAPONS =================
+"VINTAGE PISTOL":{
+type:"money",
+price:25000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:2,screw:5,polymer:2}
+}
+},
+
+"NAVY PISTOL":{
+type:"money",
+price:400000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:2,screw:5,polymer:2}
+}
+},
+
+"DB":{
+type:"money",
+price:250000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"ASSAULTRIFLE MK2":{
+type:"money",
+price:70000,
+attachments:{
+incarcator:{steel:2,screw:5,arc:1,polymer:1},
+amortizor:{steel:3,screw:5,polymer:2},
+scope:{steel:2,screw:12}
+}
+},
+
+"HEAVYRIFLE":{
+type:"money",
+price:60000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+amortizor:{steel:3,screw:5,polymer:2},
+scope:{steel:2,screw:10},
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}
+}
+},
+
+"COMBAT MG":{
+type:"money",
+price:120000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1},
+scope:{steel:2,screw:12},
+lanterna:{steel:1,screw:5,arc:1,polymer:1,bec:1,lupa:1}
+}
+},
+
+"GUSENBERG":{
+type:"money",
+price:45000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+},
+
+"MG":{
+type:"money",
+price:90000,
+attachments:{
+incarcator:{steel:1,screw:5,arc:1,polymer:1}
+}
+}
+
 };
+
 
 // ==================== ELEMENTE UI ====================
 const weaponSelect=document.getElementById("weaponSelect");
