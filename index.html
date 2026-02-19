@@ -835,9 +835,11 @@ function handleWeaponChange(fromPreset=false){
 
   updateWeaponTypeBadge(w);
 
-  fillBullets();
-  show(bulletsStep);
-  setStep(2);
+    fillBullets();
+
+  // ✅ default 100 și pornește automat pasul următor (atașamente + qty)
+  bulletsSelect.value = "100";
+  handleBulletsChange(true);
 
   const p = ammoTable[w.name];
   if(p){
@@ -849,10 +851,6 @@ function handleWeaponChange(fromPreset=false){
 
   hide(attachmentsStep);
   hide(qtyStep);
-
-  if(fromPreset){
-    handleBulletsChange(true);
-  }
 }
 
 function handleBulletsChange(fromPreset=false){
