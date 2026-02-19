@@ -6,7 +6,7 @@
 <title>FiveM Craft Calculator</title>
 <style>
   :root{
-    /* Schimbi aici link-ul imaginii (sau pui un path local: ./bg.jpg) */
+    /* ✅ Schimbă aici imaginea de fundal */
     --bg-url: url("https://i.imgur.com/hdGnzUT.jpeg");
   }
 
@@ -22,8 +22,6 @@
     position:relative;
     overflow-x:hidden;
   }
-
-  /* Background imagine + overlay */
   body::before{
     content:"";
     position:fixed;
@@ -53,23 +51,6 @@
     padding:24px;
     backdrop-filter: blur(6px);
   }
-
-  .topbar{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:10px;
-  }
-  .badge{
-    padding:6px 10px;
-    border-radius:999px;
-    background:#141414;
-    border:1px solid #2a2a2a;
-    font-size:13px;
-    opacity:.95;
-  }
-  .muted{opacity:.75; font-size:13px;}
 
   h3{margin:10px 0 10px;}
   .box{
@@ -179,7 +160,6 @@
   }
 
   hr{border:0; border-top:1px solid #2a2a2a; margin:12px 0;}
-  .kpi{font-size:22px; font-weight:900;}
 
   /* Search results */
   .searchResults{
@@ -202,15 +182,6 @@
   .srItem:first-child{border-top:none;}
   .srItem:hover{background:#181818;}
   .srLeft{display:flex; flex-direction:column; gap:2px;}
-  .pill{
-    font-size:12px;
-    padding:3px 8px;
-    border-radius:999px;
-    border:1px solid #2a2a2a;
-    background:#161616;
-    opacity:.95;
-    white-space:nowrap;
-  }
   mark{
     background:#2ecc71;
     color:#08130b;
@@ -234,11 +205,6 @@
 <body>
 
 <div class="container">
-  <div class="topbar">
-    <div class="badge" id="stepBadge">Pas 1/4</div>
-    <div class="badge" id="weaponTypeBadge">—</div>
-    <div class="badge muted">Coș multi-craft + căutare (recent + top + highlight)</div>
-  </div>
 
   <!-- STEP 1 -->
   <div class="box">
@@ -249,21 +215,13 @@
       <input id="weaponSearch" type="text" placeholder="ex: pistol, smg, rifle..." />
     </div>
 
-    <div class="muted">Sugestii rapide (click):</div>
-    <div id="searchResults" class="searchResults"></div>
+    <div class="searchResults" id="searchResults"></div>
 
     <div class="field">
       <label for="weaponSelect">Arma (listă):</label>
       <select id="weaponSelect">
         <option value="">-- Selectează arma --</option>
       </select>
-    </div>
-
-    <div class="row">
-      <button class="btn secondary" id="loadPresetBtn">Încarcă preset</button>
-      <button class="btn secondary" id="savePresetBtn">Salvează preset</button>
-      <button class="btn danger" id="clearPresetBtn">Șterge preset</button>
-      <span class="muted" id="presetStatus"></span>
     </div>
   </div>
 
@@ -284,7 +242,7 @@
     <div class="box">
       <div class="row" style="justify-content:space-between;">
         <h3 style="margin:0;">Atașamente</h3>
-        <label class="muted">
+        <label style="opacity:.85;">
           <input type="checkbox" id="noAttach" />
           Nu vreau atașamente
         </label>
@@ -296,7 +254,7 @@
       </div>
 
       <div class="attachments" id="attachmentsList"></div>
-      <div class="muted" id="attachmentsHint"></div>
+      <div style="opacity:.75;" id="attachmentsHint"></div>
     </div>
   </div>
 
@@ -312,7 +270,6 @@
       <div class="row">
         <button class="btn" id="calcBtn">Calculează</button>
         <button class="btn secondary" id="addToCartBtn">Adaugă în coș</button>
-        <span class="muted">Poți adăuga arme diferite în coș.</span>
       </div>
     </div>
   </div>
@@ -322,21 +279,22 @@
   <!-- CART -->
   <div class="box" style="margin-top:14px;">
     <div class="row" style="justify-content:space-between;">
-      <h3 style="margin:0;">Coș (Multi-craft)</h3>
+      <h3 style="margin:0;">Coș</h3>
       <div class="row">
         <button class="btn secondary" id="calcCartBtn">Calculează coș</button>
         <button class="btn danger" id="clearCartBtn">Golește coș</button>
       </div>
     </div>
-    <div class="muted">Total cumulat materiale + cost.</div>
+    <div style="opacity:.75;">Total cumulat materiale + cost.</div>
     <div id="cartList" class="cartList"></div>
     <div id="cartResult" class="result" style="display:none;"></div>
   </div>
+
 </div>
 
 <script>
 /* =========================
-   CONFIG COSTURI (cum ai zis)
+   CONFIG COSTURI
 ========================= */
 const COST_STEEL = 5000;
 const COST_POLYMER = 150;
@@ -350,7 +308,8 @@ const BULLET_OPTIONS = [];
 for(let b=100;b<=2000;b+=100) BULLET_OPTIONS.push(b);
 
 /* =========================
-   AMMO TABLE - EXACT 100/200/250 + interpolare corectă până la 2000
+   AMMO TABLE - EXACT 100/200/250 + interpolare
+   (textul “EXACT în tabel...” e scos din UI, dar logica rămâne)
 ========================= */
 const ammoTable = {
   "PISTOL":                   [{b:100,powder:100,price:5400},{b:200,powder:200,price:10666},{b:250,powder:250,price:13333}],
@@ -385,32 +344,25 @@ const ammoTable = {
 function lerp(a,b,t){ return a + (b-a)*t; }
 function ammoExactInterpolated(weaponName, bullets){
   const pts = ammoTable[weaponName];
-  if(!pts) return {powder:0, price:0, exact:false};
+  if(!pts) return {powder:0, price:0};
   const p100=pts[0], p200=pts[1], p250=pts[2];
 
-  if(bullets===100) return {powder:p100.powder, price:p100.price, exact:true};
-  if(bullets===200) return {powder:p200.powder, price:p200.price, exact:true};
-  if(bullets===250) return {powder:p250.powder, price:p250.price, exact:true};
-
-  if(bullets <= 100){
-    return {powder:p100.powder, price:p100.price, exact:false};
-  }
+  if(bullets===100) return {powder:p100.powder, price:p100.price};
+  if(bullets===200) return {powder:p200.powder, price:p200.price};
+  if(bullets===250) return {powder:p250.powder, price:p250.price};
 
   if(bullets <= 200){
     const t=(bullets-100)/(200-100);
-    return {powder:lerp(p100.powder,p200.powder,t), price:lerp(p100.price,p200.price,t), exact:false};
+    return {powder:lerp(p100.powder,p200.powder,t), price:lerp(p100.price,p200.price,t)};
   }
-
   if(bullets <= 250){
     const t=(bullets-200)/(250-200);
-    return {powder:lerp(p200.powder,p250.powder,t), price:lerp(p200.price,p250.price,t), exact:false};
+    return {powder:lerp(p200.powder,p250.powder,t), price:lerp(p200.price,p250.price,t)};
   }
-
-  // extrapolare cu panta 200->250
   const slopePowder = (p250.powder - p200.powder) / (250-200);
   const slopePrice  = (p250.price  - p200.price ) / (250-200);
   const extra = bullets - 250;
-  return {powder: p250.powder + slopePowder*extra, price: p250.price + slopePrice*extra, exact:false};
+  return {powder: p250.powder + slopePowder*extra, price: p250.price + slopePrice*extra};
 }
 
 /* =========================
@@ -459,7 +411,7 @@ const weapons = [
   { name:"ADVANCED RIFLE", type:"craft", materials:{steel:18,screw:145,barrel:1,spring:2,wood:0,polymer:78},
     attachments:[ att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}), att("Amortizor",{steel:3,screw:5,polymer:3}), att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}), att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}) ] },
 
-  // PE BANI (ordinea ta) - au și gloanțe + atașamente dacă există
+  // OFICIALA (pe bani) - ordinea ta
   { name:"Navy Pistol", type:"money", price:400000, attachments:[] },
   { name:"VINTIGE PISTOL", type:"money", price:25000,
     attachments:[ att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}), att("Amortizor",{steel:2,screw:5,polymer:2}) ] },
@@ -511,38 +463,16 @@ const weapons = [
 ];
 
 /* =========================
-   CATEGORY MAP
+   CATEGORII (fără “(Craft)”)
 ========================= */
 function categoryOf(name){
   const pistols = new Set(["PISTOL","COMBAT PISTOL","PISTOL MK2","CERAMIC PISTOL","PISTOL WM29 (XM3)"]);
   const smgs = new Set(["MICRO SMG","MACHINE PISTOL (Tec9)","MINI SMG","TEC PISTOL (Tactical SMG)","SMG","COMBAT PDW"]);
   const rifles = new Set(["ASSAULT RIFLE (AK)","COMPACT RIFLE","CARABINE RIFLE","ADVANCED RIFLE"]);
-  if(pistols.has(name)) return "Pistoale (Craft)";
-  if(smgs.has(name)) return "SMG (Craft)";
-  if(rifles.has(name)) return "Rifle (Craft)";
-  return "Pe bani";
-}
-
-/* =========================
-   USAGE STATS
-========================= */
-const STATS_KEY = "fivem_weapon_stats_v1";
-function loadStats(){
-  try{
-    const raw = localStorage.getItem(STATS_KEY);
-    if(!raw) return {counts:{}, recent:[]};
-    const s = JSON.parse(raw);
-    return {counts:s.counts||{}, recent:s.recent||[]};
-  }catch(e){
-    return {counts:{}, recent:[]};
-  }
-}
-function saveStats(stats){ localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
-function bumpWeaponUsage(name){
-  const s = loadStats();
-  s.counts[name]=(s.counts[name]||0)+1;
-  s.recent=[name, ...s.recent.filter(x=>x!==name)].slice(0,6);
-  saveStats(s);
+  if(pistols.has(name)) return "Pistoale";
+  if(smgs.has(name)) return "SMG";
+  if(rifles.has(name)) return "Rifle";
+  return "OFICIALA";
 }
 
 /* =========================
@@ -561,13 +491,6 @@ const qtyStep = document.getElementById("qtyStep");
 
 const ammoHint = document.getElementById("ammoHint");
 const attachmentsHint = document.getElementById("attachmentsHint");
-const stepBadge = document.getElementById("stepBadge");
-const weaponTypeBadge = document.getElementById("weaponTypeBadge");
-
-const loadPresetBtn = document.getElementById("loadPresetBtn");
-const savePresetBtn = document.getElementById("savePresetBtn");
-const clearPresetBtn = document.getElementById("clearPresetBtn");
-const presetStatus = document.getElementById("presetStatus");
 
 const fullKitBtn = document.getElementById("fullKitBtn");
 const noKitBtn = document.getElementById("noKitBtn");
@@ -582,9 +505,8 @@ const calcCartBtn = document.getElementById("calcCartBtn");
 const clearCartBtn = document.getElementById("clearCartBtn");
 
 /* =========================
-   Step helpers
+   Helpers
 ========================= */
-function setStep(n){ stepBadge.textContent = `Pas ${n}/4`; }
 function hide(el){ el.classList.remove("show"); }
 function show(el){ el.classList.add("show"); }
 
@@ -596,8 +518,6 @@ function resetFlow(){
   ammoHint.textContent = "";
   attachmentsHint.textContent = "";
   noAttach.checked = false;
-  weaponTypeBadge.textContent = "—";
-  setStep(1);
 }
 
 function fillBullets(){
@@ -633,50 +553,13 @@ function getSelectedWeapon(){
   return weapons[Number(idx)];
 }
 
-function updateWeaponTypeBadge(w){
-  weaponTypeBadge.textContent = `${categoryOf(w.name)} • ${w.type==="craft" ? "Craft" : "Pe bani"}`;
-}
-
 /* =========================
-   Select builder (search + groups)
+   Build weapon select (FĂRĂ popular/top)
 ========================= */
 function buildWeaponSelect(filterText=""){
   const current = weaponSelect.value;
   weaponSelect.innerHTML = `<option value="">-- Selectează arma --</option>`;
   const ft = (filterText||"").trim().toLowerCase();
-  const stats = loadStats();
-
-  const recent = (stats.recent||[])
-    .map(name => weapons.findIndex(w=>w.name===name))
-    .filter(i=>i>=0);
-
-  const top = Object.entries(stats.counts||{})
-    .sort((a,b)=> (b[1]||0)-(a[1]||0))
-    .map(([name]) => weapons.findIndex(w=>w.name===name))
-    .filter(i=>i>=0)
-    .slice(0,6);
-
-  function addGroup(label, indices){
-    const uniq=[];
-    indices.forEach(i=>{ if(!uniq.includes(i)) uniq.push(i); });
-    const filtered = uniq.filter(i=>{
-      const name = weapons[i].name.toLowerCase();
-      return !ft || name.includes(ft);
-    });
-    if(filtered.length===0) return;
-    const og=document.createElement("optgroup");
-    og.label=label;
-    filtered.forEach(i=>{
-      const opt=document.createElement("option");
-      opt.value=String(i);
-      opt.textContent=weapons[i].name;
-      og.appendChild(opt);
-    });
-    weaponSelect.appendChild(og);
-  }
-
-  addGroup("Recente", recent);
-  addGroup("Cele mai folosite", top);
 
   const groups=new Map();
   weapons.forEach((w,idx)=>{
@@ -685,7 +568,7 @@ function buildWeaponSelect(filterText=""){
     groups.get(label).push(idx);
   });
 
-  const order=["Pistoale (Craft)","SMG (Craft)","Rifle (Craft)","Pe bani"];
+  const order=["Pistoale","SMG","Rifle","OFICIALA"];
   order.forEach(label=>{
     const arr=groups.get(label)||[];
     const og=document.createElement("optgroup");
@@ -708,7 +591,7 @@ function buildWeaponSelect(filterText=""){
 }
 
 /* =========================
-   Search results list
+   Search results (FĂRĂ “folosit x5”)
 ========================= */
 function escapeHtml(s){
   return (s||"").replace(/[&<>"']/g, m => ({
@@ -724,19 +607,7 @@ function highlight(text, query){
 }
 function renderSearchResults(query){
   const q=(query||"").trim().toLowerCase();
-  const stats=loadStats();
   let list=weapons.map((w,idx)=>({w,idx}));
-
-  const recentRank=new Map((stats.recent||[]).map((name,i)=>[name,i]));
-  const count=stats.counts||{};
-  list.sort((a,b)=>{
-    const ar=recentRank.has(a.w.name) ? recentRank.get(a.w.name) : 999;
-    const br=recentRank.has(b.w.name) ? recentRank.get(b.w.name) : 999;
-    if(ar!==br) return ar-br;
-    const ac=count[a.w.name]||0, bc=count[b.w.name]||0;
-    if(ac!==bc) return bc-ac;
-    return a.w.name.localeCompare(b.w.name);
-  });
 
   if(q){
     list=list.filter(x => x.w.name.toLowerCase().includes(q) || categoryOf(x.w.name).toLowerCase().includes(q));
@@ -745,7 +616,7 @@ function renderSearchResults(query){
 
   searchResults.innerHTML="";
   if(list.length===0){
-    searchResults.innerHTML=`<div class="srItem"><span class="muted">Niciun rezultat.</span></div>`;
+    searchResults.innerHTML=`<div class="srItem"><span style="opacity:.75;">Niciun rezultat.</span></div>`;
     return;
   }
 
@@ -755,9 +626,9 @@ function renderSearchResults(query){
     div.innerHTML=`
       <div class="srLeft">
         <div><b>${highlight(w.name, query)}</b></div>
-        <div class="muted">${escapeHtml(categoryOf(w.name))} • ${w.type==="craft"?"Craft":"Pe bani"}</div>
+        <div style="opacity:.75;">${escapeHtml(categoryOf(w.name))} • ${w.type==="craft"?"Craft":"OFICIALA"}</div>
       </div>
-      <div class="pill">${(loadStats().counts||{})[w.name] ? `folosit x${(loadStats().counts||{})[w.name]}` : "nou"}</div>
+      <div style="opacity:.55;">›</div>
     `;
     div.addEventListener("click", ()=>{
       weaponSelect.value=String(idx);
@@ -768,30 +639,8 @@ function renderSearchResults(query){
 }
 
 /* =========================
-   Presets
+   Attachments controls
 ========================= */
-const PRESET_KEY="fivem_craft_preset_v2";
-
-function savePreset(){
-  const w=getSelectedWeapon();
-  if(!w){ presetStatus.textContent="Selectează o armă înainte."; return; }
-
-  const preset={
-    weaponIndex:Number(weaponSelect.value),
-    bullets:Number(bulletsSelect.value||100),
-    qty:Number(document.getElementById("qty").value||1),
-    noAttach:!!noAttach.checked,
-    selectedAtt:[]
-  };
-
-  if(w.attachments && w.attachments.length && !preset.noAttach){
-    document.querySelectorAll(".attCheck:checked").forEach(cb=>preset.selectedAtt.push(Number(cb.value)));
-  }
-
-  localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-  presetStatus.textContent="Preset salvat.";
-}
-
 function syncNoAttachUI(){
   const checks=attachmentsList.querySelectorAll(".attCheck");
   if(noAttach.checked){
@@ -801,49 +650,11 @@ function syncNoAttachUI(){
   }else{
     checks.forEach(c=>{c.disabled=false;});
     attachmentsList.style.display="";
-    attachmentsHint.textContent="";
+    // dacă arma are atașamente, nu mai afișăm mesajul “nu sunt luate...”
+    if(checks.length>0) attachmentsHint.textContent="";
   }
 }
 
-function loadPreset(){
-  const raw=localStorage.getItem(PRESET_KEY);
-  if(!raw){ presetStatus.textContent="Nu există preset salvat."; return; }
-  let p;
-  try{ p=JSON.parse(raw); }catch(e){ presetStatus.textContent="Preset corupt."; return; }
-
-  weaponSelect.value=String(p.weaponIndex ?? "");
-  if(weaponSelect.value===""){ presetStatus.textContent="Preset invalid."; return; }
-
-  handleWeaponChange(true);
-
-  bulletsSelect.value=String(p.bullets ?? 100);
-  document.getElementById("qty").value=String(p.qty ?? 1);
-
-  noAttach.checked=!!p.noAttach;
-  syncNoAttachUI();
-
-  if(!noAttach.checked && Array.isArray(p.selectedAtt)){
-    p.selectedAtt.forEach(i=>{
-      const cb=attachmentsList.querySelector(`.attCheck[value="${i}"]`);
-      if(cb) cb.checked=true;
-    });
-  }
-
-  presetStatus.textContent="Preset încărcat.";
-}
-
-function clearPreset(){
-  localStorage.removeItem(PRESET_KEY);
-  presetStatus.textContent="Preset șters.";
-}
-
-loadPresetBtn.addEventListener("click", loadPreset);
-savePresetBtn.addEventListener("click", savePreset);
-clearPresetBtn.addEventListener("click", clearPreset);
-
-/* =========================
-   ATT buttons
-========================= */
 function fullKit(){
   noAttach.checked=false;
   syncNoAttachUI();
@@ -858,15 +669,13 @@ noKitBtn.addEventListener("click", noKit);
 noAttach.addEventListener("change", syncNoAttachUI);
 
 /* =========================
-   FLOW (FIXED default bullets!)
+   FLOW (default bullets=100, dar UI rămâne ok)
 ========================= */
-function handleWeaponChange(fromPreset=false){
+function handleWeaponChange(){
   resultDiv.style.display="none";
 
   const w=getSelectedWeapon();
   if(!w){ resetFlow(); return; }
-
-  updateWeaponTypeBadge(w);
 
   // reset steps
   hide(bulletsStep); hide(attachmentsStep); hide(qtyStep);
@@ -876,30 +685,20 @@ function handleWeaponChange(fromPreset=false){
   ammoHint.textContent="";
   attachmentsHint.textContent="";
 
-  // bullets UI
+  // bullets
   fillBullets();
   show(bulletsStep);
-  setStep(2);
 
-  // hint exact 100/200/250
-  const p=ammoTable[w.name];
-  if(p){
-    ammoHint.textContent =
-      `EXACT în tabel: 100 → ${p[0].powder} praf / ${p[0].price}$ • 200 → ${p[1].powder} / ${p[1].price}$ • 250 → ${p[2].powder} / ${p[2].price}$. 300-2000 sunt interpolate.`;
-  }else{
-    ammoHint.textContent = "Nu există tabel gloanțe pentru arma asta.";
-  }
-
-  // ✅ default 100 + pornește automat pasul următor (fără să ascundă gloanțele)
+  // ✅ default 100
   bulletsSelect.value="100";
+
+  // mici info (opțional) – NU mai afișăm textul “EXACT...”
+  // ammoHint.textContent = "";
+
+  // declanșăm pasul următor automat, dar fără să “strice” afișarea gloanțelor
   setTimeout(()=>{
     bulletsSelect.dispatchEvent(new Event("change"));
   }, 0);
-
-  if(fromPreset){
-    // preset va seta bullets apoi; îi lăsăm o mică întârziere să aplice
-    setTimeout(()=>{}, 0);
-  }
 }
 
 function handleBulletsChange(){
@@ -910,7 +709,6 @@ function handleBulletsChange(){
   const hasAtt = renderAttachments(w);
   if(hasAtt){
     show(attachmentsStep);
-    setStep(3);
     noAttach.checked=false;
     syncNoAttachUI();
   }else{
@@ -919,10 +717,9 @@ function handleBulletsChange(){
 
   // qty
   show(qtyStep);
-  setStep(4);
 }
 
-weaponSelect.addEventListener("change", ()=>handleWeaponChange(false));
+weaponSelect.addEventListener("change", handleWeaponChange);
 bulletsSelect.addEventListener("change", handleBulletsChange);
 
 /* =========================
@@ -997,31 +794,26 @@ calcBtn.addEventListener("click", ()=>{
 
   const out=computeOneSelection(sel);
 
-  bumpWeaponUsage(out.w.name);
-  buildWeaponSelect(weaponSearch.value||"");
-  renderSearchResults(weaponSearch.value||"");
-
   resultDiv.style.display="block";
   resultDiv.innerHTML=`
-    <h3>Rezultat (Breakdown)</h3>
+    <h3>Rezultat</h3>
 
     <div class="grid">
       <div class="box">
         <div><b>Arma:</b> ${out.w.name}</div>
-        <div><b>Tip:</b> ${out.w.type==="craft" ? "Craft" : "Pe bani"}</div>
+        <div><b>Categoria:</b> ${categoryOf(out.w.name)}</div>
+        <div><b>Tip:</b> ${out.w.type==="craft" ? "Craft" : "OFICIALA"}</div>
         <div><b>Arme:</b> ${out.qty}</div>
         <div><b>Gloanțe:</b> ${out.bullets}</div>
-        <div class="muted" style="margin-top:8px;">100/200/250 exact din tabel. 300-2000 interpolate.</div>
       </div>
 
       <div class="box">
-        <div class="muted">Total final</div>
-        <div class="kpi">${out.total.toLocaleString()}$</div>
+        <div style="opacity:.75;">Total</div>
+        <div style="font-size:22px;font-weight:900;">${out.total.toLocaleString()}$</div>
         <hr>
         <div><b>Cost armă:</b> ${Math.round(out.costWeapon).toLocaleString()}$</div>
         <div><b>Cost gloanțe:</b> ${Math.round(out.costAmmo).toLocaleString()}$</div>
         <div><b>Cost materiale:</b> ${Math.round(out.costMats).toLocaleString()}$</div>
-        <div class="muted" style="margin-top:6px;">Materiale cost: oțel + (șuruburi/20)*oțel + polimer.</div>
       </div>
     </div>
 
@@ -1055,8 +847,7 @@ calcBtn.addEventListener("click", ()=>{
         <hr>
 
         <b>Gloanțe:</b><br>
-        Praf: ${Math.round(out.ammoTotals.powder||0)}<br>
-        <span class="muted">Cost gloanțe inclus separat (${Math.round(out.costAmmo).toLocaleString()}$).</span>
+        Praf: ${Math.round(out.ammoTotals.powder||0)}
       </div>
     </div>
   `;
@@ -1082,13 +873,13 @@ function renderCart(){
   cartList.innerHTML="";
   cartResult.style.display="none";
   if(cart.length===0){
-    cartList.innerHTML=`<div class="muted">Coșul e gol.</div>`;
+    cartList.innerHTML=`<div style="opacity:.75;">Coșul e gol.</div>`;
     return;
   }
   cart.forEach((it,idx)=>{
     const w=weapons[it.weaponIndex];
     const chips=[];
-    chips.push(`<span class="mini">${w.type==="craft"?"Craft":"Pe bani"}</span>`);
+    chips.push(`<span class="mini">${w.type==="craft"?"Craft":"OFICIALA"}</span>`);
     chips.push(`<span class="mini">${it.qty} arme</span>`);
     chips.push(`<span class="mini">${it.bullets} gl</span>`);
     chips.push(`<span class="mini">${it.noAttach ? "fără ataș." : (it.selectedAtt?.length||0)+" ataș."}</span>`);
@@ -1099,7 +890,7 @@ function renderCart(){
       <div class="cartTitle">
         <div>
           <b>${w.name}</b>
-          <div class="muted">${categoryOf(w.name)}</div>
+          <div style="opacity:.75;">${categoryOf(w.name)} • ${w.type==="craft"?"Craft":"OFICIALA"}</div>
         </div>
         <div class="cartMeta">${chips.join("")}</div>
       </div>
@@ -1132,11 +923,6 @@ addToCartBtn.addEventListener("click", ()=>{
   cart.push(sel);
   saveCart();
   renderCart();
-
-  const w=weapons[sel.weaponIndex];
-  bumpWeaponUsage(w.name);
-  buildWeaponSelect(weaponSearch.value||"");
-  renderSearchResults(weaponSearch.value||"");
 });
 
 clearCartBtn.addEventListener("click", ()=>{
@@ -1162,11 +948,11 @@ calcCartBtn.addEventListener("click", ()=>{
 
   cartResult.style.display="block";
   cartResult.innerHTML=`
-    <h3>Total Coș (Cumulat)</h3>
+    <h3>Total Coș</h3>
     <div class="grid">
       <div class="box">
-        <div class="muted">Total final</div>
-        <div class="kpi">${Math.round(sumAll).toLocaleString()}$</div>
+        <div style="opacity:.75;">Total</div>
+        <div style="font-size:22px;font-weight:900;">${Math.round(sumAll).toLocaleString()}$</div>
         <hr>
         <div><b>Cost arme:</b> ${Math.round(sumWeapon).toLocaleString()}$</div>
         <div><b>Cost gloanțe:</b> ${Math.round(sumAmmo).toLocaleString()}$</div>
@@ -1209,7 +995,6 @@ function init(){
   resetFlow();
   loadCart();
   renderCart();
-  if(localStorage.getItem(PRESET_KEY)) presetStatus.textContent="Ai un preset salvat.";
 }
 init();
 </script>
