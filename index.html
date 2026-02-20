@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -11,9 +12,9 @@
   media="print"
   onload="this.media='all'"
   rel="stylesheet"
-  href="https://site-assets.fontawesome.com/releases/v7.2.0/css/fontawesome.css"
+  href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css"
 />
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
   :root{
     --bg-url: url("https://i.imgur.com/fTp0NnE.png"); /* Shop background */
@@ -25,7 +26,10 @@
     --muted: rgba(255,255,255,.75);
     --shadow: 0 18px 70px rgba(0,0,0,.55);
   }
-
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
   *{box-sizing:border-box}
   body{
     margin:0;
@@ -288,8 +292,6 @@
 
   .grid{
     display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px;
   }
   @media (max-width: 900px){
     .grid{grid-template-columns:1fr;}
@@ -325,7 +327,6 @@
     inset:0;
     background:rgba(0,0,0,.72);
     display:none;
-    align-items:center;
     justify-content:center;
     padding:16px;
     z-index:999;
@@ -336,6 +337,7 @@
     max-height:min(86vh, 860px);
     overflow:hidden;
     border-radius:18px;
+    margin-top: 60px;
     border:1px solid rgba(255,255,255,0.10);
     background: rgba(12,12,12,0.96);
     backdrop-filter: blur(10px);
@@ -529,8 +531,9 @@
     border:1px solid var(--border);
     background:#141414;
     color:#fff;
-    border-radius:12px;
-    padding:8px 10px;
+    border-radius:10px;
+    width: 35px;
+    height: 35px;
     font-weight:900;
   }
   .lbClose:hover{background:#1b1b1b;}
@@ -541,7 +544,7 @@
     align-items:center;
   }
   .lbImg{
-    width:min(760px, 90vw);
+    width: min(760px, 90vw);
     max-height:70vh;
     object-fit:contain;
     background:#0f0f0f;
@@ -609,7 +612,7 @@
       <div class="tab active" data-page="pageWeapons">Arme</div>
       <div class="tab" data-page="pageAmmo">Gloanțe</div>
     </div>
-    <div class="topActions">
+    <div class="topActions" style="display: none;">
       <button class="tinyBtn" id="copyLinkBtn" type="button">Copiază link</button>
     </div>
   </div>
@@ -664,10 +667,10 @@
           <h3 style="margin:0;">Atașamente</h3>
           <div class="row" style="gap:10px;">
             <label style="opacity:.85;">
-              <input type="checkbox" id="noAttach" />
+              <input type="checkbox" id="noAttach" style="accent-color: var(--green);" />
               Fără atașamente
             </label>
-            <label style="opacity:.85;">
+            <label style="opacity:.85; display: none;">
               <input type="checkbox" id="slotMode" checked />
               Sloturi
             </label>
@@ -748,6 +751,7 @@
             <h3 style="margin-top:0;">Necesare</h3>
             <div class="matGrid" id="ammoOnlyMats"></div>
           </div>
+          <br>
           <div class="box">
             <h3 style="margin-top:0;">Cost</h3>
             <div style="font-size:22px;font-weight:900;" id="ammoOnlyCost">0$</div>
@@ -1233,11 +1237,7 @@ function currentSelectionToObject(){
 
   let selectedAtt=[];
   if(w.attachments && w.attachments.length && !noAttach.checked){
-    if(slotModeToggle.checked){
-      selectedAtt = getSelectedAttachmentsFromSlots(w);
-    }else{
-      attachmentsList.querySelectorAll(".attCheck:checked").forEach(cb=>selectedAtt.push(Number(cb.value)));
-    }
+    selectedAtt = getSelectedAttachmentsFromSlots(w);
   }
   return {weaponIndex:Number(idx), bullets, qty, noAttach:!!noAttach.checked, selectedAtt};
 }
@@ -1331,8 +1331,9 @@ function stockInputsHTML(values){
             </div>
             <input
               inputmode="numeric"
-              style="width:110px; min-width:110px; flex:0 0 auto;"
+              style="width: 50px; min-width: 50px; flex:0 0 auto; background: none; color: white; border:1px solid var(--border); border-radius:8px; padding:6px 3px; text-align: center;"
               type="number"
+              class="stockInput"
               min="0"
               value="${v}"
               data-stock-key="${k}"
@@ -1383,7 +1384,7 @@ function renderResult(out, isPreview){
           </div>
         </div>
       </div>
-
+      <br>
       <div class="box">
         <div class="muted">Total (necesar)</div>
         <div style="font-size:22px;font-weight:900;">${money(out.total)}</div>
@@ -1401,7 +1402,7 @@ function renderResult(out, isPreview){
         <h3 style="margin-top:0;">Materiale (Total)</h3>
         ${needGrid}
       </div>
-<br>
+        <br>
       <div class="box" style="width:100%">
         <h3 style="margin-top:0;">Îți lipsesc (după stoc)</h3>
         <div class="muted" style="margin-bottom:10px;">Completează stocul mai jos.</div>
@@ -1420,28 +1421,6 @@ function renderResult(out, isPreview){
           <b>Cost lipsuri materiale:</b> ${money(costMissingMats)}<br>
           <b>Cost lipsuri gloanțe:</b> ${money(costMissingAmmo)}<br>
           <b>Total lipsuri:</b> ${money(totalMissing)}
-        </div>
-      </div>
-    </div>
-
-    <hr>
-
-    <div class="grid">
-      <div class="box">
-        <h3 style="margin-top:0;">Detaliat</h3>
-        <hr>
-        <div><b>Armă:</b> ${compactLineFromTotals(out.baseTotals)}</div>
-        <hr>
-        <div><b>Atașamente:</b> ${compactLineFromTotals(out.attTotals)}</div>
-        <hr>
-        <div><b>Gloanțe:</b> ${compactLineFromTotals(out.ammoTotals)}</div>
-      </div>
-
-      <div class="box">
-        <h3 style="margin-top:0;">Acțiuni</h3>
-        <div class="row">
-          <button class="btn secondary" id="copyDiscordBtn" type="button">Copiază (Discord)</button>
-          <button class="btn secondary" id="resetStockBtn" type="button">Reset stoc</button>
         </div>
       </div>
     </div>
@@ -1596,7 +1575,7 @@ function renderAttachmentsSlots(w){
     `;
     const row = card.querySelector("[data-slot]");
     // none option
-    row.appendChild(makeSlotOption(slot, "Nimic", null, true));
+
     groups[slot].forEach(a=>{
       row.appendChild(makeSlotOption(slot, a.name, a.idx, false));
     });
@@ -1621,8 +1600,13 @@ function makeSlotOption(slot, label, attIdx, isDefault){
   div.addEventListener("click", ()=>{
     // single select within slot
     const all=[...slotModeWrap.querySelectorAll(`.slotOpt[data-slot="${cssEscape(slot)}"]`)];
-    all.forEach(x=>x.classList.remove("active"));
-    div.classList.add("active");
+    // all.forEach(x=>x.classList.remove("active"));
+    console.log(div.classList.contains("active"));
+    if (!div.classList.contains("active")) {
+        div.classList.add("active");
+    } else {
+        div.classList.remove("active");
+    }
     updateLivePreview();
   });
   return div;
@@ -1777,7 +1761,18 @@ selectedWeaponImg.addEventListener("click", ()=>{
 ========================= */
 calcBtn.addEventListener("click", ()=>{
   const sel=currentSelectionToObject();
-  if(!sel){ alert("Selectează o armă!"); return; }
+  if(!sel){ 
+        Swal.fire({
+            title: 'Eroare!',
+            text: 'Selectează o armă!',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#1e1e1e',
+            color: '#ffffff',
+            confirmButtonColor: 'var(--green)'
+        })
+    return; 
+  }
   const out=computeOneSelection(sel);
   renderResult(out, false);
   resultDiv.scrollIntoView({behavior:"smooth", block:"start"});
@@ -1857,7 +1852,17 @@ function renderCart(){
 }
 addToCartBtn.addEventListener("click", ()=>{
   const sel=currentSelectionToObject();
-  if(!sel){ alert("Selectează o armă!"); return; }
+  if(!sel){ 
+        Swal.fire({
+            title: 'Eroare!',
+            text: 'Selectează o armă!',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#1e1e1e',
+            color: '#ffffff',
+            confirmButtonColor: 'var(--green)'
+        })
+    return; }
   cart.push(sel);
   saveCart();
   renderCart();
@@ -1868,7 +1873,17 @@ clearCartBtn.addEventListener("click", ()=>{
   renderCart();
 });
 calcCartBtn.addEventListener("click", ()=>{
-  if(cart.length===0){ alert("Coșul e gol."); return; }
+  if(cart.length===0){ 
+        Swal.fire({
+            title: 'Eroare!',
+            text: 'Coșul e gol.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#1e1e1e',
+            color: '#ffffff',
+            confirmButtonColor: 'var(--green)'
+        })
+    return; }
 
   const totalTotals=emptyTotals();
   let sumWeapon=0, sumAmmo=0, sumMats=0, sumAll=0;
