@@ -4,6 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FiveM Craft Calculator</title>
+
+<!-- FontAwesome (pentru logo coș) -->
+<link
+  defer
+  media="print"
+  onload="this.media='all'"
+  rel="stylesheet"
+  href="https://site-assets.fontawesome.com/releases/v7.2.0/css/fontawesome.css"
+/>
+
 <style>
   :root{
     /* ✅ Schimbă aici imaginea de fundal */
@@ -358,7 +368,6 @@
     <div class="field">
       <label>Arma:</label>
 
-      <!-- ✅ în loc de dropdown direct: buton care deschide modal -->
       <button class="btn selectWeapon" id="openWeaponModalBtn" type="button">
         <span class="left">
           <img id="selectedWeaponImg" alt="" />
@@ -367,7 +376,7 @@
         <span class="chev">▾</span>
       </button>
 
-      <!-- ✅ dropdown păstrat (ascuns) pentru compatibilitate cu logica -->
+      <!-- dropdown ascuns (păstrat pentru logică) -->
       <select id="weaponSelect" style="display:none;">
         <option value="">-- Selectează arma --</option>
       </select>
@@ -412,7 +421,7 @@
   <!-- STEP 4 -->
   <div class="step" id="qtyStep">
     <div class="box">
-      <h3 style="margin-top:0;">Cantitate & Calcul</h3>
+      <h3 style="margin-top:0;">Cantitate</h3>
       <div class="field">
         <label for="qty">Număr arme:</label>
         <input type="number" id="qty" min="1" value="1"/>
@@ -422,6 +431,10 @@
         <button class="btn" id="calcBtn" type="button">Calculează</button>
         <button class="btn secondary" id="addToCartBtn" type="button">Adaugă în coș</button>
       </div>
+
+      <div class="muted" style="margin-top:8px;">
+        ✅ Preview-ul se actualizează automat când schimbi gloanțe / qty / atașamente.
+      </div>
     </div>
   </div>
 
@@ -430,7 +443,10 @@
   <!-- CART -->
   <div class="box" style="margin-top:14px;">
     <div class="row" style="justify-content:space-between;">
-      <h3 style="margin:0;">Coș</h3>
+      <h3 style="margin:0;">
+        <i class="fa-solid fa-basket-shopping"></i>
+        Coș
+      </h3>
       <div class="row">
         <button class="btn secondary" id="calcCartBtn" type="button">Calculează coș</button>
         <button class="btn danger" id="clearCartBtn" type="button">Golește coș</button>
@@ -481,18 +497,18 @@ const COST_POLYMER = 150;
 function costFromScrews(totalScrews){ return Math.floor((totalScrews||0)/20) * COST_STEEL; }
 
 /* =========================
-   MATERIAL ICONS (URL)
+   MATERIAL ICONS (URL-urile tale)
 ========================= */
 const materialIcons = {
-  steel:   "https://img.icons8.com/fluency/96/anvil.png",
-  screw:   "https://img.icons8.com/fluency/96/screw.png",
-  barrel:  "https://img.icons8.com/fluency/96/metal-tube.png",
-  spring:  "https://img.icons8.com/fluency/96/spring.png",
-  wood:    "https://img.icons8.com/fluency/96/wood.png",
-  polymer: "https://img.icons8.com/fluency/96/plastic.png",
-  powder:  "https://img.icons8.com/fluency/96/firework.png",
-  bec:     "https://img.icons8.com/fluency/96/light-on.png",
-  lupa:    "https://img.icons8.com/fluency/96/telescope.png",
+  steel:   "https://assetsfivem.fplayt.ro/images/gui/images/items/steel.webp",
+  screw:   "https://assetsfivem.fplayt.ro/images/gui/images/items/bolts.webp",
+  barrel:  "https://assetsfivem.fplayt.ro/images/gui/images/items/barrel.webp",
+  spring:  "https://assetsfivem.fplayt.ro/images/gui/images/items/arcmetalic.webp",
+  wood:    "https://assetsfivem.fplayt.ro/images/gui/images/items/wood.webp",
+  polymer: "https://assetsfivem.fplayt.ro/images/gui/images/items/polimer.webp",
+  bec:     "https://assetsfivem.fplayt.ro/images/gui/images/items/bec.webp",
+  lupa:    "https://assetsfivem.fplayt.ro/images/gui/images/items/lupa.webp",
+  powder:  "https://assetsfivem.fplayt.ro/images/gui/images/items/copper.webp"
 };
 
 function matRow(key, label, value){
@@ -510,7 +526,7 @@ function matRow(key, label, value){
 }
 
 /* =========================
-   BULLETS OPTIONS 100..2000
+   BULLETS OPTIONS 100..2000 (100,200,300...2000)
 ========================= */
 const BULLET_OPTIONS = [];
 for(let b=100;b<=2000;b+=100) BULLET_OPTIONS.push(b);
@@ -519,39 +535,40 @@ for(let b=100;b<=2000;b+=100) BULLET_OPTIONS.push(b);
    AMMO TABLE - EXACT 100/200/250 + interpolare
 ========================= */
 const ammoTable = {
-  "PISTOL":                   [{b:100,powder:100,price:5400},{b:200,powder:200,price:10666},{b:250,powder:250,price:13333}],
-  "COMBAT PISTOL":            [{b:100,powder:100,price:5400},{b:200,powder:200,price:10700},{b:250,powder:250,price:13400}],
-  "PISTOL MK2":               [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
-  "CERAMIC PISTOL":           [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
-  "PISTOL WM29 (XM3)":        [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+  "PISTOL":                    [{b:100,powder:100,price:5400},{b:200,powder:200,price:10666},{b:250,powder:250,price:13333}],
+  "COMBAT PISTOL":             [{b:100,powder:100,price:5400},{b:200,powder:200,price:10700},{b:250,powder:250,price:13400}],
+  "PISTOL MK2":                [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+  "CERAMIC PISTOL":            [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
+  "PISTOL WM29 (XM3)":         [{b:100,powder:130,price:7000},{b:200,powder:260,price:13900},{b:250,powder:325,price:17400}],
 
-  "MICRO SMG":                [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
-  "MACHINE PISTOL (Tec9)":    [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
-  "MINI SMG":                 [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "MICRO SMG":                 [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "MACHINE PISTOL (Tec9)":     [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "MINI SMG":                  [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
 
-  "TEC PISTOL (Tactical SMG)":[{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
-  "SMG":                      [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
-  "COMBAT PDW":               [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "TEC PISTOL (Tactical SMG)": [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "SMG":                       [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "COMBAT PDW":                [{b:100,powder:180,price:10000},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
 
-  "ASSAULT RIFLE (AK)":       [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
-  "COMPACT RIFLE":            [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
-  "CARABINE RIFLE":           [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
-  "ADVANCED RIFLE":           [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "ASSAULT RIFLE (AK)":        [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
+  "COMPACT RIFLE":             [{b:100,powder:250,price:13400},{b:200,powder:500,price:26700},{b:250,powder:625,price:33400}],
+  "CARABINE RIFLE":            [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "ADVANCED RIFLE":            [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
 
-  "Navy Pistol":              [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
-  "VINTIGE PISTOL":           [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
-  "DB":                       [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
-  "ASSAULTRIFE MK2 (AK)":     [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
-  "HEAVYRIFLE":               [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
-  "COMBAT MG":                [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
-  "GUSENBERG":                [{b:100,powder:180,price:9600},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
-  "MG":                       [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "NAVY REVOLVER":             [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
+  "VINTAGE PISTOL":            [{b:100,powder:150,price:8000},{b:200,powder:300,price:16000},{b:250,powder:375,price:20000}],
+  "DB":                        [{b:100,powder:500,price:26700},{b:200,powder:1000,price:54000},{b:250,powder:1250,price:66700}],
+  "ASSAULT RIFLE MK2":         [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "HEAVY RIFLE":               [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "COMBAT MG MK2":             [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
+  "GUSENBERG":                 [{b:100,powder:180,price:9600},{b:200,powder:360,price:19000},{b:250,powder:450,price:24000}],
+  "MG":                        [{b:100,powder:300,price:16000},{b:200,powder:600,price:32000},{b:250,powder:750,price:40000}],
 };
 
 function lerp(a,b,t){ return a + (b-a)*t; }
 function ammoExactInterpolated(weaponName, bullets){
   const pts = ammoTable[weaponName];
   if(!pts) return {powder:0, price:0};
+
   const p100=pts[0], p200=pts[1], p250=pts[2];
 
   if(bullets===100) return {powder:p100.powder, price:p100.price};
@@ -619,11 +636,12 @@ const weapons = [
     attachments:[ att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}), att("Amortizor",{steel:3,screw:5,polymer:3}), att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}), att("Lunetă",{steel:2,screw:10,polymer:2,lupa:1}) ] },
 
   // OFICIALA (pe bani) - ordinea ta
-  { name:"Navy Pistol", type:"money", price:400000, attachments:[] },
-  { name:"VINTIGE PISTOL", type:"money", price:25000,
+  { name:"NAVY REVOLVER", type:"money", price:400000, attachments:[] },
+  { name:"VINTAGE PISTOL", type:"money", price:25000,
     attachments:[ att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}), att("Amortizor",{steel:2,screw:5,polymer:2}) ] },
   { name:"DB", type:"money", price:250000, attachments:[] },
-  { name:"ASSAULTRIFE MK2 (AK)", type:"money", price:70000,
+
+  { name:"ASSAULT RIFLE MK2", type:"money", price:70000,
     attachments:[
       att("Lunetă-Mica",{steel:2,screw:10,polymer:2,lupa:1}),
       att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
@@ -641,7 +659,8 @@ const weapons = [
       att("Split-End-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
       att("Fat-End-Muzzle-Brake",{steel:1,screw:4,polymer:1})
     ]},
-  { name:"HEAVYRIFLE", type:"money", price:60000,
+
+  { name:"HEAVY RIFLE", type:"money", price:60000,
     attachments:[
       att("Lanternă",{steel:1,screw:5,polymer:1,bec:1,lupa:1}),
       att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
@@ -649,7 +668,8 @@ const weapons = [
       att("Amortizor",{steel:3,screw:5,polymer:3}),
       att("Grip",{steel:1,screw:5,polymer:1})
     ]},
-  { name:"COMBAT MG", type:"money", price:120000,
+
+  { name:"COMBAT MG MK2", type:"money", price:120000,
     attachments:[
       att("Lunetă-Mare",{steel:2,screw:12,polymer:2,lupa:1}),
       att("Încărcător",{steel:1,screw:5,spring:1,polymer:1}),
@@ -665,6 +685,7 @@ const weapons = [
       att("Flat-Muzzle-Brake",{steel:1,screw:4,polymer:1}),
       att("Split-End-Muzzle-Brake",{steel:1,screw:4,polymer:1})
     ]},
+
   { name:"GUSENBERG", type:"money", price:45000, attachments:[] },
   { name:"MG", type:"money", price:90000, attachments:[] },
 ];
@@ -683,19 +704,42 @@ function categoryOf(name){
 }
 
 /* =========================
-   IMAGINI (URL-uri)
-   - poți înlocui ulterior cu link-uri reale pentru fiecare armă
+   IMAGINI ARME (URL-urile tale)
+   - cheile sunt EXACT ca în weapons[].name
 ========================= */
-const imgByCategory = {
-  "Pistoale": "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?auto=format&fit=crop&w=900&q=80",
-  "SMG":      "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=900&q=80",
-  "Rifle":    "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=900&q=80",
-  "OFICIALA": "https://images.unsplash.com/photo-1520975722215-7d9d0f0c1f9d?auto=format&fit=crop&w=900&q=80"
+const weaponImages = {
+  "PISTOL": "http://assetsarena.fplayt.ro/images/weapons/Pistol.webp",
+  "COMBAT PISTOL": "http://assetsarena.fplayt.ro/images/weapons/Combat_Pistol.webp",
+  "PISTOL MK2": "http://assetsarena.fplayt.ro/images/weapons/Pistol_Mk_II.webp",
+  "CERAMIC PISTOL": "http://assetsarena.fplayt.ro/images/weapons/Ceramic_Pistol.webp",
+  "PISTOL WM29 (XM3)": "http://assetsarena.fplayt.ro/images/weapons/Pistol_XM3.webp",
+  "MICRO SMG": "http://assetsarena.fplayt.ro/images/weapons/Micro_SMG.webp",
+  "MACHINE PISTOL (Tec9)": "http://assetsarena.fplayt.ro/images/weapons/Machine_Pistol.webp",
+  "MINI SMG": "http://assetsarena.fplayt.ro/images/weapons/Mini_SMG.webp",
+  "TEC PISTOL (Tactical SMG)": "http://assetsarena.fplayt.ro/images/weapons/TEC_Pistol.webp",
+  "SMG": "http://assetsarena.fplayt.ro/images/weapons/SMG.webp",
+  "COMBAT PDW": "http://assetsarena.fplayt.ro/images/weapons/Combat_PDW.webp",
+  "ASSAULT RIFLE (AK)": "http://assetsarena.fplayt.ro/images/weapons/Assault_Rifle.webp",
+  "COMPACT RIFLE": "http://assetsarena.fplayt.ro/images/weapons/Compact_Rifle.webp",
+  "CARABINE RIFLE": "http://assetsarena.fplayt.ro/images/weapons/Carbine_Rifle.webp",
+  "ADVANCED RIFLE": "http://assetsarena.fplayt.ro/images/weapons/Advanced_Rifle.webp",
+
+  "VINTAGE PISTOL": "http://assetsarena.fplayt.ro/images/weapons/Vintage_Pistol.webp",
+  "DB": "http://assetsarena.fplayt.ro/images/weapons/Double_Action_Revolver.webp",
+  "NAVY REVOLVER": "http://assetsarena.fplayt.ro/images/weapons/Navy_Revolver.webp",
+  "ASSAULT RIFLE MK2": "http://assetsarena.fplayt.ro/images/weapons/Assault_Rifle_Mk_II.webp",
+  "HEAVY RIFLE": "http://assetsarena.fplayt.ro/images/weapons/Heavy_Rifle.webp",
+  "COMBAT MG MK2": "http://assetsarena.fplayt.ro/images/weapons/Combat_MG_Mk_II.webp",
+  "GUSENBERG": "http://assetsarena.fplayt.ro/images/weapons/Gusenberg_Sweeper.webp",
+  "MG": "http://assetsarena.fplayt.ro/images/weapons/MG.webp"
 };
-/* Dacă vrei per-weapon:
-const weaponImages = { "PISTOL":"https://...", ... };
-*/
-const weaponImages = {}; // gol -> fallback pe categorie
+
+const imgByCategory = {
+  "Pistoale": "http://assetsarena.fplayt.ro/images/weapons/Pistol.webp",
+  "SMG":      "http://assetsarena.fplayt.ro/images/weapons/SMG.webp",
+  "Rifle":    "http://assetsarena.fplayt.ro/images/weapons/Assault_Rifle.webp",
+  "OFICIALA": "http://assetsarena.fplayt.ro/images/weapons/MG.webp"
+};
 
 function imageForWeapon(name){
   return weaponImages[name] || imgByCategory[categoryOf(name)] || imgByCategory["OFICIALA"];
@@ -723,6 +767,7 @@ const attachmentsHint = document.getElementById("attachmentsHint");
 const fullKitBtn = document.getElementById("fullKitBtn");
 const noKitBtn = document.getElementById("noKitBtn");
 
+const qtyInput = document.getElementById("qty");
 const calcBtn = document.getElementById("calcBtn");
 const addToCartBtn = document.getElementById("addToCartBtn");
 const resultDiv = document.getElementById("result");
@@ -770,15 +815,19 @@ function renderAttachments(w){
   attachmentsHint.textContent="";
 
   if(!w.attachments || w.attachments.length===0){
-    attachmentsHint.textContent = "Această armă nu are atașamente.";
+    // PASUL 5 (UX): ascundem complet step-ul de atașamente
+    hide(attachmentsStep);
     return false;
   }
+
   w.attachments.forEach((a,idx)=>{
     const div=document.createElement("div");
     div.className="attach";
     div.innerHTML = `<label><input type="checkbox" class="attCheck" value="${idx}"> ${a.name}</label>`;
     attachmentsList.appendChild(div);
   });
+
+  show(attachmentsStep);
   return true;
 }
 
@@ -813,22 +862,38 @@ function syncNoAttachUI(){
   }else{
     checks.forEach(c=>{c.disabled=false;});
     attachmentsList.style.display="";
-    if(checks.length>0) attachmentsHint.textContent="";
+    attachmentsHint.textContent="";
   }
+  updateLivePreview();
 }
 
 function fullKit(){
   noAttach.checked=false;
   syncNoAttachUI();
   attachmentsList.querySelectorAll(".attCheck").forEach(c=>c.checked=true);
+  updateLivePreview();
 }
 function noKit(){
   noAttach.checked=true;
   syncNoAttachUI();
+  updateLivePreview();
 }
 fullKitBtn.addEventListener("click", fullKit);
 noKitBtn.addEventListener("click", noKit);
 noAttach.addEventListener("change", syncNoAttachUI);
+
+// când bifezi/ debifezi atașamente
+attachmentsList.addEventListener("change", (e)=>{
+  if(e.target && e.target.classList.contains("attCheck")){
+    updateLivePreview();
+  }
+});
+
+// qty live
+qtyInput.addEventListener("input", ()=>{
+  if(parseInt(qtyInput.value||"1",10) < 1) qtyInput.value = "1";
+  updateLivePreview();
+});
 
 /* =========================
    FLOW
@@ -863,7 +928,7 @@ function handleWeaponChange(){
   fillBullets();
   show(bulletsStep);
 
-  // default 100 + trigger next step (ca să poți calcula fără să schimbi)
+  // default 100 + trigger
   bulletsSelect.value="100";
   setTimeout(()=> bulletsSelect.dispatchEvent(new Event("change")), 0);
 }
@@ -874,24 +939,19 @@ function handleBulletsChange(){
 
   const b = parseInt(bulletsSelect.value || "100", 10);
   const am = ammoExactInterpolated(w.name, b);
-  ammoHint.textContent = `Praf (pentru ${b}): ${Math.round(am.powder)} • Cost gloanțe: ${Math.round(am.price).toLocaleString()}$`;
+  ammoHint.textContent = `Praf: ${Math.round(am.powder)} • Cost gloanțe: ${Math.round(am.price).toLocaleString()}$`;
 
-  const hasAtt = renderAttachments(w);
-  if(hasAtt){
-    show(attachmentsStep);
-    noAttach.checked=false;
-    syncNoAttachUI();
-  }else{
-    hide(attachmentsStep);
-  }
+  renderAttachments(w); // include PAS 5 (ascunde step-ul dacă nu are atașamente)
   show(qtyStep);
+
+  updateLivePreview();
 }
 
 weaponSelect.addEventListener("change", handleWeaponChange);
 bulletsSelect.addEventListener("change", handleBulletsChange);
 
 /* =========================
-   CALCUL
+   CALCUL (core)
 ========================= */
 function estimateMaterialsCost(t){
   let cost=0;
@@ -946,25 +1006,23 @@ function currentSelectionToObject(){
   const w=getSelectedWeapon();
   if(!w) return null;
 
-  const qty=Math.max(1, parseInt(document.getElementById("qty").value||"1",10));
+  const qty=Math.max(1, parseInt(qtyInput.value||"1",10));
   const bullets=parseInt(bulletsSelect.value||"100",10);
 
   const selectedAtt=[];
   if(w.attachments && w.attachments.length && !noAttach.checked){
-    document.querySelectorAll(".attCheck:checked").forEach(cb=>selectedAtt.push(Number(cb.value)));
+    attachmentsList.querySelectorAll(".attCheck:checked").forEach(cb=>selectedAtt.push(Number(cb.value)));
   }
   return {weaponIndex:Number(weaponSelect.value), bullets, qty, noAttach:!!noAttach.checked, selectedAtt};
 }
 
-calcBtn.addEventListener("click", ()=>{
-  const sel=currentSelectionToObject();
-  if(!sel){ alert("Selectează o armă!"); return; }
-
-  const out=computeOneSelection(sel);
-
+/* =========================
+   PAS 3: PREVIEW LIVE (fără să apeși Calculează)
+========================= */
+function renderResult(out, isPreview){
   resultDiv.style.display="block";
   resultDiv.innerHTML=`
-    <h3>Rezultat</h3>
+    <h3>${isPreview ? "Preview" : "Rezultat"}</h3>
 
     <div class="grid">
       <div class="box">
@@ -1018,7 +1076,7 @@ calcBtn.addEventListener("click", ()=>{
         <hr>
 
         <b>Atașamente:</b><br>
-        Oțel: ${Math.round(out.attTotals.steel||0)} • Șuruburi: ${Math.round(out.attTotals.screw||0)} • Polimer: ${Math.round(out.attTotals.polymer||0)} • Bec: ${Math.round(out.attTotals.bec||0)} • Lupă: ${Math.round(out.attTotals.lupa||0)} • Arc: ${Math.round(out.attTotals.spring||0)}
+        Oțel: ${Math.round(out.attTotals.steel||0)} • Șuruburi: ${Math.round(out.attTotals.screw||0)} • Polimer: ${Math.round(out.attTotals.polymer||0)} • Bec: ${Math.round(out.attTotals.bec||0)} • Lupă: ${Math.round(out.attTotals.lupa||0)} • Arc: ${Math.round(out.attTotals.spring||0)} • Țeavă: ${Math.round(out.attTotals.barrel||0)}
 
         <hr>
 
@@ -1027,6 +1085,20 @@ calcBtn.addEventListener("click", ()=>{
       </div>
     </div>
   `;
+}
+
+function updateLivePreview(){
+  const sel=currentSelectionToObject();
+  if(!sel) return;
+  const out=computeOneSelection(sel);
+  renderResult(out, true);
+}
+
+calcBtn.addEventListener("click", ()=>{
+  const sel=currentSelectionToObject();
+  if(!sel){ alert("Selectează o armă!"); return; }
+  const out=computeOneSelection(sel);
+  renderResult(out, false);
   resultDiv.scrollIntoView({behavior:"smooth", block:"start"});
 });
 
