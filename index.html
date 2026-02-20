@@ -72,7 +72,7 @@
     max-width:100%;
     opacity:.9;
   }
-  .field select,.field input{
+  .field select,.field input, .modalControls input{
     flex:1;
     min-width:240px;
     padding:10px;
@@ -83,7 +83,7 @@
     color:#fff;
     transition:.2s;
   }
-  .field select:focus,.field input:focus{
+  .field select:focus,.field input:focus, .modalControls input:focus{
     outline:none;
     border-color:#2ecc71;
   }
@@ -158,7 +158,7 @@
     margin-top:0;
   }
   .step.show{
-    max-height:1400px;
+    max-height:1600px;
     opacity:1;
     transform: translateY(0);
     border-left-color:#2ecc71;
@@ -187,7 +187,7 @@
   }
   @media (max-width: 900px){
     .grid{grid-template-columns:1fr;}
-    .field select,.field input{min-width:0; width:100%;}
+    .field select,.field input,.modalControls input{min-width:0; width:100%;}
     .field label{width:100%;}
     .btn.selectWeapon .title{max-width: 62vw;}
   }
@@ -481,6 +481,35 @@ const COST_POLYMER = 150;
 function costFromScrews(totalScrews){ return Math.floor((totalScrews||0)/20) * COST_STEEL; }
 
 /* =========================
+   MATERIAL ICONS (URL)
+========================= */
+const materialIcons = {
+  steel:   "https://img.icons8.com/fluency/96/anvil.png",
+  screw:   "https://img.icons8.com/fluency/96/screw.png",
+  barrel:  "https://img.icons8.com/fluency/96/metal-tube.png",
+  spring:  "https://img.icons8.com/fluency/96/spring.png",
+  wood:    "https://img.icons8.com/fluency/96/wood.png",
+  polymer: "https://img.icons8.com/fluency/96/plastic.png",
+  powder:  "https://img.icons8.com/fluency/96/firework.png",
+  bec:     "https://img.icons8.com/fluency/96/light-on.png",
+  lupa:    "https://img.icons8.com/fluency/96/telescope.png",
+};
+
+function matRow(key, label, value){
+  const v = Math.round(value || 0);
+  return `
+    <div class="row" style="justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid #222;">
+      <div class="row" style="gap:10px; align-items:center; min-width:0;">
+        <img src="${materialIcons[key] || ""}" alt="${label}"
+             style="width:26px;height:26px;border-radius:8px;object-fit:cover;background:#0f0f0f;border:1px solid #2a2a2a;">
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</span>
+      </div>
+      <b>${v}</b>
+    </div>
+  `;
+}
+
+/* =========================
    BULLETS OPTIONS 100..2000
 ========================= */
 const BULLET_OPTIONS = [];
@@ -664,13 +693,9 @@ const imgByCategory = {
   "OFICIALA": "https://images.unsplash.com/photo-1520975722215-7d9d0f0c1f9d?auto=format&fit=crop&w=900&q=80"
 };
 /* Dacă vrei per-weapon:
-const weaponImages = {
-  "PISTOL": "https://.....",
-  "COMBAT PISTOL": "https://.....",
-  ...
-};
+const weaponImages = { "PISTOL":"https://...", ... };
 */
-const weaponImages = {}; // las gol: folosește fallback pe categorie
+const weaponImages = {}; // gol -> fallback pe categorie
 
 function imageForWeapon(name){
   return weaponImages[name] || imgByCategory[categoryOf(name)] || imgByCategory["OFICIALA"];
@@ -838,7 +863,7 @@ function handleWeaponChange(){
   fillBullets();
   show(bulletsStep);
 
-  // default 100
+  // default 100 + trigger next step (ca să poți calcula fără să schimbi)
   bulletsSelect.value="100";
   setTimeout(()=> bulletsSelect.dispatchEvent(new Event("change")), 0);
 }
@@ -846,6 +871,10 @@ function handleWeaponChange(){
 function handleBulletsChange(){
   const w=getSelectedWeapon();
   if(!w) return;
+
+  const b = parseInt(bulletsSelect.value || "100", 10);
+  const am = ammoExactInterpolated(w.name, b);
+  ammoHint.textContent = `Praf (pentru ${b}): ${Math.round(am.powder)} • Cost gloanțe: ${Math.round(am.price).toLocaleString()}$`;
 
   const hasAtt = renderAttachments(w);
   if(hasAtt){
@@ -939,11 +968,19 @@ calcBtn.addEventListener("click", ()=>{
 
     <div class="grid">
       <div class="box">
-        <div><b>Arma:</b> ${out.w.name}</div>
-        <div><b>Categoria:</b> ${categoryOf(out.w.name)}</div>
-        <div><b>Tip:</b> ${out.w.type==="craft" ? "Craft" : "OFICIALA"}</div>
-        <div><b>Arme:</b> ${out.qty}</div>
-        <div><b>Gloanțe:</b> ${out.bullets}</div>
+        <div class="row" style="align-items:center; gap:12px;">
+          <img src="${imageForWeapon(out.w.name)}" alt="${out.w.name}"
+               style="width:72px;height:72px;border-radius:14px;object-fit:cover;border:1px solid #2a2a2a;background:#0f0f0f;">
+          <div style="min-width:0;">
+            <div style="font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${out.w.name}
+            </div>
+            <div style="opacity:.75;">${categoryOf(out.w.name)} • ${out.w.type==="craft" ? "Craft" : "OFICIALA"}</div>
+            <div style="opacity:.9;margin-top:6px;">
+              <b>Arme:</b> ${out.qty} • <b>Gloanțe:</b> ${out.bullets}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="box">
@@ -961,15 +998,15 @@ calcBtn.addEventListener("click", ()=>{
     <div class="grid">
       <div class="box">
         <h3 style="margin-top:0;">Materiale (Total)</h3>
-        Oțel: ${Math.round(out.grandTotals.steel||0)}<br>
-        Șuruburi: ${Math.round(out.grandTotals.screw||0)}<br>
-        Țeavă: ${Math.round(out.grandTotals.barrel||0)}<br>
-        Arc: ${Math.round(out.grandTotals.spring||0)}<br>
-        Lemn: ${Math.round(out.grandTotals.wood||0)}<br>
-        Polimer: ${Math.round(out.grandTotals.polymer||0)}<br>
-        Bec: ${Math.round(out.grandTotals.bec||0)}<br>
-        Lupă: ${Math.round(out.grandTotals.lupa||0)}<br>
-        Praf de pușcă: ${Math.round(out.grandTotals.powder||0)}<br>
+        ${matRow("steel","Oțel", out.grandTotals.steel)}
+        ${matRow("screw","Șuruburi", out.grandTotals.screw)}
+        ${matRow("barrel","Țeavă", out.grandTotals.barrel)}
+        ${matRow("spring","Arc", out.grandTotals.spring)}
+        ${matRow("wood","Lemn", out.grandTotals.wood)}
+        ${matRow("polymer","Polimer", out.grandTotals.polymer)}
+        ${matRow("bec","Bec", out.grandTotals.bec)}
+        ${matRow("lupa","Lupă", out.grandTotals.lupa)}
+        ${matRow("powder","Praf de pușcă", out.grandTotals.powder)}
       </div>
 
       <div class="box">
@@ -1027,9 +1064,13 @@ function renderCart(){
     div.className="cartItem";
     div.innerHTML=`
       <div class="cartTitle">
-        <div>
-          <b>${w.name}</b>
-          <div style="opacity:.75;">${categoryOf(w.name)} • ${w.type==="craft"?"Craft":"OFICIALA"}</div>
+        <div class="row" style="gap:10px; align-items:center;">
+          <img src="${imageForWeapon(w.name)}" alt="${w.name}"
+               style="width:54px;height:54px;border-radius:14px;object-fit:cover;border:1px solid #2a2a2a;background:#0f0f0f;">
+          <div>
+            <b>${w.name}</b>
+            <div style="opacity:.75;">${categoryOf(w.name)} • ${w.type==="craft"?"Craft":"OFICIALA"}</div>
+          </div>
         </div>
         <div class="cartMeta">${chips.join("")}</div>
       </div>
@@ -1085,30 +1126,39 @@ calcCartBtn.addEventListener("click", ()=>{
     sumAll += out.total;
   });
 
+  const firstW = weapons[cart[0].weaponIndex];
+
   cartResult.style.display="block";
   cartResult.innerHTML=`
     <h3>Total Coș</h3>
     <div class="grid">
       <div class="box">
-        <div style="opacity:.75;">Total</div>
-        <div style="font-size:22px;font-weight:900;">${Math.round(sumAll).toLocaleString()}$</div>
-        <hr>
-        <div><b>Cost arme:</b> ${Math.round(sumWeapon).toLocaleString()}$</div>
-        <div><b>Cost gloanțe:</b> ${Math.round(sumAmmo).toLocaleString()}$</div>
-        <div><b>Cost materiale:</b> ${Math.round(sumMats).toLocaleString()}$</div>
+        <div class="row" style="align-items:center; gap:12px;">
+          <img src="${imageForWeapon(firstW.name)}" alt="Coș"
+               style="width:72px;height:72px;border-radius:14px;object-fit:cover;border:1px solid #2a2a2a;background:#0f0f0f;">
+          <div style="min-width:0;">
+            <div style="opacity:.75;">Total</div>
+            <div style="font-size:22px;font-weight:900;">${Math.round(sumAll).toLocaleString()}$</div>
+            <div style="opacity:.85; margin-top:6px;">
+              <b>Cost arme:</b> ${Math.round(sumWeapon).toLocaleString()}$ •
+              <b>Gloanțe:</b> ${Math.round(sumAmmo).toLocaleString()}$ •
+              <b>Materiale:</b> ${Math.round(sumMats).toLocaleString()}$
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="box">
         <h3 style="margin-top:0;">Materiale (Total)</h3>
-        Oțel: ${Math.round(totalTotals.steel||0)}<br>
-        Șuruburi: ${Math.round(totalTotals.screw||0)}<br>
-        Țeavă: ${Math.round(totalTotals.barrel||0)}<br>
-        Arc: ${Math.round(totalTotals.spring||0)}<br>
-        Lemn: ${Math.round(totalTotals.wood||0)}<br>
-        Polimer: ${Math.round(totalTotals.polymer||0)}<br>
-        Bec: ${Math.round(totalTotals.bec||0)}<br>
-        Lupă: ${Math.round(totalTotals.lupa||0)}<br>
-        Praf de pușcă: ${Math.round(totalTotals.powder||0)}<br>
+        ${matRow("steel","Oțel", totalTotals.steel)}
+        ${matRow("screw","Șuruburi", totalTotals.screw)}
+        ${matRow("barrel","Țeavă", totalTotals.barrel)}
+        ${matRow("spring","Arc", totalTotals.spring)}
+        ${matRow("wood","Lemn", totalTotals.wood)}
+        ${matRow("polymer","Polimer", totalTotals.polymer)}
+        ${matRow("bec","Bec", totalTotals.bec)}
+        ${matRow("lupa","Lupă", totalTotals.lupa)}
+        ${matRow("powder","Praf de pușcă", totalTotals.powder)}
       </div>
     </div>
   `;
