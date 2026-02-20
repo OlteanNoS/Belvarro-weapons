@@ -32,10 +32,6 @@
     }
   *{box-sizing:border-box}
   body{
-    background-image: url("https://i.imgur.com/hdGnzUT.jpeg");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
     margin:0;
     font-family: Arial, sans-serif;
     color:var(--text);
@@ -43,8 +39,13 @@
     display:flex;
     justify-content:center;
     padding:20px;
+    background:#0d0d0d;
     position:relative;
     overflow-x:hidden;
+    background-image: url("https://i.imgur.com/hdGnzUT.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
   }
   body::before{
     content:"";
@@ -68,12 +69,33 @@
   .container{
     width:1000px;
     max-width:100%;
+    height: 950px;
+    max-height: 950px;
     background: rgba(0,0,0,0.82);
     border:1px solid rgba(255,255,255,0.08);
     border-radius:16px;
     padding:18px;
     backdrop-filter: blur(7px);
     box-shadow: var(--shadow);
+    overflow-y: scroll;
+    display: none;
+  }
+
+  .imagine {
+    background-image: url("https://i.imgur.com/hjouzE0.png");
+    background-size: 50%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 1vh;
+    left: -3.5vw;
+    width: 15vw;
+    height: 15vh;
+    opacity: .8;
+  }
+
+  .container::-webkit-scrollbar {
+    display: none;
   }
 
   /* Top tabs */
@@ -602,214 +624,213 @@
   @keyframes fadeIn{ from {opacity:0; transform: translateY(8px);} to {opacity:1; transform: translateY(0);} }
 </style>
 </head>
-<body>
-
-<div class="container">
-
-  <div class="topbar">
-    <div class="tabs">
-      <div class="tab active" data-page="pageWeapons">Arme</div>
-      <div class="tab" data-page="pageAmmo">Gloanțe</div>
-    </div>
-    <div class="topActions" style="display: none;">
-      <button class="tinyBtn" id="copyLinkBtn" type="button">Copiază link</button>
-    </div>
-  </div>
-
-  <!-- =========================
-       PAGE: WEAPONS
-  ========================== -->
-  <div class="page show fadeIn" id="pageWeapons">
-
-    <!-- STEP 1 -->
-    <div class="box">
-      <h3 style="margin-top:0;">Ce vrei să craftezi?</h3>
-
-      <div class="field">
-        <label>Arma:</label>
-
-        <button class="btn selectWeapon" id="openWeaponModalBtn" type="button">
-          <span class="left">
-            <img id="selectedWeaponImg" alt="" />
-            <span class="title" id="selectedWeaponLabel">-- Selectează arma --</span>
-          </span>
-          <span class="chev">▾</span>
-        </button>
-
-        <!-- dropdown ascuns (păstrat pentru logică) -->
-        <select id="weaponSelect" style="display:none;">
-          <option value="">-- Selectează arma --</option>
-        </select>
-      </div>
-
-      <div class="selectHint">
-        <span class="selectPill"><span class="dot"></span>Selectează</span>
-      </div>
-    </div>
-
-    <!-- STEP 2 -->
-    <div class="step" id="bulletsStep">
-      <div class="box">
-        <h3 style="margin-top:0;">Gloanțe</h3>
-        <div class="field">
-          <label for="bulletsSelect">Cantitate:</label>
-          <select id="bulletsSelect"></select>
+<body onclick="openGunModal()">
+      <div class="imagine"></div>
+      <div class="container" id="weaponContainer">
+      <div class="topbar">
+        <div class="tabs">
+          <div class="tab active" data-page="pageWeapons">Arme</div>
+          <div class="tab" data-page="pageAmmo">Gloanțe</div>
         </div>
-        <div class="muted" id="ammoHint"></div>
+        <div class="topActions" style="display: none;">
+          <button class="tinyBtn" id="copyLinkBtn" type="button">Copiază link</button>
+        </div>
       </div>
-    </div>
 
-    <!-- STEP 3 -->
-    <div class="step" id="attachmentsStep">
-      <div class="box">
-        <div class="row" style="justify-content:space-between;">
-          <h3 style="margin:0;">Atașamente</h3>
-          <div class="row" style="gap:10px;">
-            <label style="opacity:.85;">
-              <input type="checkbox" id="noAttach" style="accent-color: var(--green);" />
-              Fără atașamente
-            </label>
-            <label style="opacity:.85; display: none;">
-              <input type="checkbox" id="slotMode" checked />
-              Sloturi
-            </label>
+      <!-- =========================
+          PAGE: WEAPONS
+      ========================== -->
+      <div class="page show fadeIn" id="pageWeapons">
+
+        <!-- STEP 1 -->
+        <div class="box">
+          <h3 style="margin-top:0;">Ce vrei să craftezi?</h3>
+
+          <div class="field">
+            <label>Arma:</label>
+
+            <button class="btn selectWeapon" id="openWeaponModalBtn" type="button">
+              <span class="left">
+                <img id="selectedWeaponImg" alt="" />
+                <span class="title" id="selectedWeaponLabel">-- Selectează arma --</span>
+              </span>
+              <span class="chev">▾</span>
+            </button>
+
+            <!-- dropdown ascuns (păstrat pentru logică) -->
+            <select id="weaponSelect" style="display:none;">
+              <option value="">-- Selectează arma --</option>
+            </select>
+          </div>
+
+          <div class="selectHint">
+            <span class="selectPill"><span class="dot"></span>Selectează</span>
           </div>
         </div>
 
-        <!-- Slot mode -->
-        <div id="slotModeWrap" class="slotWrap"></div>
-
-        <!-- List mode (legacy) -->
-        <div class="attachments" id="attachmentsList" style="display:none;"></div>
-        <div style="opacity:.75;" id="attachmentsHint"></div>
-      </div>
-    </div>
-
-    <!-- STEP 4 -->
-    <div class="step" id="qtyStep">
-      <div class="box">
-        <h3 style="margin-top:0;">Cantitate</h3>
-        <div class="field">
-          <label for="qty">Număr arme:</label>
-          <input type="number" id="qty" min="1" value="1"/>
-        </div>
-
-        <div class="row">
-          <button class="btn" id="calcBtn" type="button">Calculează</button>
-          <button class="btn secondary" id="addToCartBtn" type="button">Adaugă în coș</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="result" class="result"></div>
-
-    <!-- CART -->
-    <div class="box" style="margin-top:14px;">
-      <div class="row" style="justify-content:space-between;">
-        <h3 style="margin:0;">
-          <i class="fa-solid fa-basket-shopping"></i>
-          Coș
-        </h3>
-        <div class="row">
-          <button class="btn secondary" id="calcCartBtn" type="button">Calculează coș</button>
-          <button class="btn danger" id="clearCartBtn" type="button">Golește coș</button>
-        </div>
-      </div>
-      <div id="cartList" class="cartList"></div>
-      <div id="cartResult" class="result" style="display:none;"></div>
-    </div>
-
-  </div>
-
-  <!-- =========================
-       PAGE: AMMO ONLY
-  ========================== -->
-  <div class="page" id="pageAmmo">
-    <div class="box">
-      <h3 style="margin-top:0;">Calculator gloanțe</h3>
-      <div class="field">
-        <label>Arma:</label>
-        <select id="ammoWeaponSelect"></select>
-      </div>
-      <div class="field">
-        <label>Cantitate:</label>
-        <select id="ammoOnlyBullets"></select>
-      </div>
-
-      <div class="result" id="ammoOnlyResult" style="display:block;">
-        <div class="row" style="align-items:center; gap:12px;">
-          <img id="ammoOnlyImg" alt="" style="width:70px;height:70px;border-radius:16px;object-fit:contain;border:1px solid var(--border);background:#0f0f0f;">
-          <div style="min-width:0;">
-            <div style="font-size:16px;font-weight:900;" id="ammoOnlyName">—</div>
-            <div class="muted" id="ammoOnlyMeta">—</div>
-          </div>
-        </div>
-        <hr>
-        <div class="grid">
+        <!-- STEP 2 -->
+        <div class="step" id="bulletsStep">
           <div class="box">
-            <h3 style="margin-top:0;">Necesare</h3>
-            <div class="matGrid" id="ammoOnlyMats"></div>
+            <h3 style="margin-top:0;">Gloanțe</h3>
+            <div class="field">
+              <label for="bulletsSelect">Cantitate:</label>
+              <select id="bulletsSelect"></select>
+            </div>
+            <div class="muted" id="ammoHint"></div>
           </div>
-          <br>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step" id="attachmentsStep">
           <div class="box">
-            <h3 style="margin-top:0;">Cost</h3>
-            <div style="font-size:22px;font-weight:900;" id="ammoOnlyCost">0$</div>
-            <div class="muted" id="ammoOnlyPowder">0 praf</div>
+            <div class="row" style="justify-content:space-between;">
+              <h3 style="margin:0;">Atașamente</h3>
+              <div class="row" style="gap:10px;">
+                <label style="opacity:.85;">
+                  <input type="checkbox" id="noAttach" style="accent-color: var(--green);" />
+                  Fără atașamente
+                </label>
+                <label style="opacity:.85; display: none;">
+                  <input type="checkbox" id="slotMode" checked />
+                  Sloturi
+                </label>
+              </div>
+            </div>
+
+            <!-- Slot mode -->
+            <div id="slotModeWrap" class="slotWrap"></div>
+
+            <!-- List mode (legacy) -->
+            <div class="attachments" id="attachmentsList" style="display:none;"></div>
+            <div style="opacity:.75;" id="attachmentsHint"></div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step" id="qtyStep">
+          <div class="box">
+            <h3 style="margin-top:0;">Cantitate</h3>
+            <div class="field">
+              <label for="qty">Număr arme:</label>
+              <input type="number" id="qty" min="1" value="1"/>
+            </div>
+
+            <div class="row">
+              <button class="btn" id="calcBtn" type="button">Calculează</button>
+              <button class="btn secondary" id="addToCartBtn" type="button">Adaugă în coș</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="result" class="result"></div>
+
+        <!-- CART -->
+        <div class="box" style="margin-top:14px;">
+          <div class="row" style="justify-content:space-between;">
+            <h3 style="margin:0;">
+              <i class="fa-solid fa-basket-shopping"></i>
+              Coș
+            </h3>
+            <div class="row">
+              <button class="btn secondary" id="calcCartBtn" type="button">Calculează coș</button>
+              <button class="btn danger" id="clearCartBtn" type="button">Golește coș</button>
+            </div>
+          </div>
+          <div id="cartList" class="cartList"></div>
+          <div id="cartResult" class="result" style="display:none;"></div>
+        </div>
+
+      </div>
+
+      <!-- =========================
+          PAGE: AMMO ONLY
+      ========================== -->
+      <div class="page" id="pageAmmo">
+        <div class="box">
+          <h3 style="margin-top:0;">Calculator gloanțe</h3>
+          <div class="field">
+            <label>Arma:</label>
+            <select id="ammoWeaponSelect"></select>
+          </div>
+          <div class="field">
+            <label>Cantitate:</label>
+            <select id="ammoOnlyBullets"></select>
+          </div>
+
+          <div class="result" id="ammoOnlyResult" style="display:block;">
+            <div class="row" style="align-items:center; gap:12px;">
+              <img id="ammoOnlyImg" alt="" style="width:70px;height:70px;border-radius:16px;object-fit:contain;border:1px solid var(--border);background:#0f0f0f;">
+              <div style="min-width:0;">
+                <div style="font-size:16px;font-weight:900;" id="ammoOnlyName">—</div>
+                <div class="muted" id="ammoOnlyMeta">—</div>
+              </div>
+            </div>
+            <hr>
+            <div class="grid">
+              <div class="box">
+                <h3 style="margin-top:0;">Necesare</h3>
+                <div class="matGrid" id="ammoOnlyMats"></div>
+              </div>
+              <br>
+              <div class="box">
+                <h3 style="margin-top:0;">Cost</h3>
+                <div style="font-size:22px;font-weight:900;" id="ammoOnlyCost">0$</div>
+                <div class="muted" id="ammoOnlyPowder">0 praf</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-</div>
-
-<!-- TOOLTIP preview -->
-<div class="tooltip" id="tooltip">
-  <div class="tipTitle" id="tipTitle"></div>
-  <div class="tipRow"><span class="muted">Tip</span><b id="tipType"></b></div>
-  <div class="tipRow"><span class="muted">Cost (1 armă + 100 gl)</span><b id="tipCost"></b></div>
-  <div class="tipRow"><span class="muted">Praf (100 gl)</span><b id="tipPowder"></b></div>
-  <div class="tipSmall" id="tipMats"></div>
-</div>
-
-<!-- LIGHTBOX zoom -->
-<div class="lightbox" id="lightbox">
-  <div class="lbInner">
-    <div class="lbHeader">
-      <b id="lbTitle">Preview</b>
-      <button class="lbClose" id="lbClose" type="button">✕</button>
-    </div>
-    <div class="lbImgWrap">
-      <img class="lbImg" id="lbImg" alt="">
-    </div>
-  </div>
-</div>
-
-<!-- MODAL WEAPON PICKER -->
-<div class="modalOverlay" id="weaponModal">
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Alege arma">
-    <div class="modalHeader">
-      <div class="title">Alege arma</div>
-      <button class="x" id="closeWeaponModalBtn" type="button">✕</button>
     </div>
 
-    <div class="modalControls">
-      <input id="modalSearch" type="text" placeholder="Caută armă..." style="flex:1; min-width:240px;"/>
-      <div class="row">
-        <div class="pill active" data-cat="ALL">Toate</div>
-        <div class="pill" data-cat="Pistoale">Pistoale</div>
-        <div class="pill" data-cat="SMG">SMG</div>
-        <div class="pill" data-cat="Rifle">Rifle</div>
-        <div class="pill" data-cat="OFICIALA">OFICIALA</div>
+    <!-- TOOLTIP preview -->
+    <div class="tooltip" id="tooltip">
+      <div class="tipTitle" id="tipTitle"></div>
+      <div class="tipRow"><span class="muted">Tip</span><b id="tipType"></b></div>
+      <div class="tipRow"><span class="muted">Cost (1 armă + 100 gl)</span><b id="tipCost"></b></div>
+      <div class="tipRow"><span class="muted">Praf (100 gl)</span><b id="tipPowder"></b></div>
+      <div class="tipSmall" id="tipMats"></div>
+    </div>
+
+    <!-- LIGHTBOX zoom -->
+    <div class="lightbox" id="lightbox">
+      <div class="lbInner">
+        <div class="lbHeader">
+          <b id="lbTitle">Preview</b>
+          <button class="lbClose" id="lbClose" type="button">✕</button>
+        </div>
+        <div class="lbImgWrap">
+          <img class="lbImg" id="lbImg" alt="">
+        </div>
       </div>
     </div>
 
-    <div class="modalBody">
-      <div class="weaponGrid" id="weaponGrid"></div>
-      <div class="muted" id="weaponGridEmpty" style="display:none; padding:10px;">Niciun rezultat.</div>
+    <!-- MODAL WEAPON PICKER -->
+    <div class="modalOverlay" id="weaponModal">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Alege arma">
+        <div class="modalHeader">
+          <div class="title">Alege arma</div>
+          <button class="x" id="closeWeaponModalBtn" type="button">✕</button>
+        </div>
+
+        <div class="modalControls">
+          <input id="modalSearch" type="text" placeholder="Caută armă..." style="flex:1; min-width:240px;"/>
+          <div class="row">
+            <div class="pill active" data-cat="ALL">Toate</div>
+            <div class="pill" data-cat="Pistoale">Pistoale</div>
+            <div class="pill" data-cat="SMG">SMG</div>
+            <div class="pill" data-cat="Rifle">Rifle</div>
+            <div class="pill" data-cat="OFICIALA">OFICIALA</div>
+          </div>
+        </div>
+
+        <div class="modalBody">
+          <div class="weaponGrid" id="weaponGrid"></div>
+          <div class="muted" id="weaponGridEmpty" style="display:none; padding:10px;">Niciun rezultat.</div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
 <script>
 /* =========================
@@ -1071,6 +1092,7 @@ function slotOfAttachmentName(attName){
   return "Altele";
 }
 
+
 /* =========================
    UI elements
 ========================= */
@@ -1145,6 +1167,10 @@ const ammoOnlyPowder = document.getElementById("ammoOnlyPowder");
 function hide(el){ el.classList.remove("show"); }
 function show(el){ el.classList.add("show"); }
 function money(n){ return Math.round(n||0).toLocaleString() + "$"; }
+
+function openGunModal() {
+  document.getElementById("weaponContainer").style.display = "block";
+}
 
 function resetFlow(){
   hide(bulletsStep); hide(attachmentsStep); hide(qtyStep);
@@ -2207,4 +2233,3 @@ init();
 
 </body>
 </html>
-
