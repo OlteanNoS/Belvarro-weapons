@@ -7,7 +7,7 @@
 <style>
   :root{
     /* ✅ Schimbă aici imaginea de fundal */
-    --bg-url: url("https://i.imgur.com/hdGnzUT.jpeg");
+    --bg-url: url("https://images.unsplash.com/photo-1523206489230-c012c64b2b48?auto=format&fit=crop&w=1920&q=80");
   }
 
   body{
@@ -115,6 +115,38 @@
   .btn.danger{background:#c0392b;}
   .btn.danger:hover{background:#a93226;}
 
+  .btn.selectWeapon{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:#141414;
+    border:1px solid #2a2a2a;
+    font-weight:800;
+  }
+  .btn.selectWeapon:hover{background:#1b1b1b;}
+  .btn.selectWeapon .left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+  }
+  .btn.selectWeapon img{
+    width:42px;height:42px;
+    border-radius:10px;
+    object-fit:cover;
+    border:1px solid #2a2a2a;
+    background:#0f0f0f;
+  }
+  .btn.selectWeapon .title{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width: 700px;
+  }
+  .chev{opacity:.6;font-weight:900;}
+
   .step{
     overflow:hidden;
     max-height:0;
@@ -126,7 +158,7 @@
     margin-top:0;
   }
   .step.show{
-    max-height:1200px;
+    max-height:1400px;
     opacity:1;
     transform: translateY(0);
     border-left-color:#2ecc71;
@@ -157,37 +189,10 @@
     .grid{grid-template-columns:1fr;}
     .field select,.field input{min-width:0; width:100%;}
     .field label{width:100%;}
+    .btn.selectWeapon .title{max-width: 62vw;}
   }
 
   hr{border:0; border-top:1px solid #2a2a2a; margin:12px 0;}
-
-  /* Search results */
-  .searchResults{
-    margin-top:10px;
-    border:1px solid #2a2a2a;
-    border-radius:14px;
-    background:#101010;
-    max-height:220px;
-    overflow:auto;
-  }
-  .srItem{
-    padding:10px 12px;
-    border-top:1px solid #1f1f1f;
-    cursor:pointer;
-    display:flex;
-    gap:10px;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .srItem:first-child{border-top:none;}
-  .srItem:hover{background:#181818;}
-  .srLeft{display:flex; flex-direction:column; gap:2px;}
-  mark{
-    background:#2ecc71;
-    color:#08130b;
-    padding:0 2px;
-    border-radius:4px;
-  }
 
   /* Cart */
   .cartList{margin-top:10px; display:flex; flex-direction:column; gap:10px;}
@@ -200,6 +205,146 @@
   .cartTitle{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
   .cartMeta{display:flex; gap:8px; flex-wrap:wrap;}
   .mini{font-size:12px; padding:3px 8px; border-radius:999px; border:1px solid #2a2a2a; background:#161616;}
+
+  /* =========================
+     MODAL WEAPON PICKER
+  ========================= */
+  .modalOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:999;
+  }
+  .modalOverlay.show{display:flex;}
+  .modal{
+    width:min(1040px, 98vw);
+    max-height:min(86vh, 860px);
+    overflow:hidden;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.08);
+    background: rgba(12,12,12,0.96);
+    backdrop-filter: blur(10px);
+    display:flex;
+    flex-direction:column;
+    box-shadow: 0 20px 80px rgba(0,0,0,.6);
+    transform: translateY(8px);
+    opacity:0;
+    animation: pop .18s ease forwards;
+  }
+  @keyframes pop{
+    to { transform: translateY(0); opacity:1; }
+  }
+  .modalHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .modalHeader .title{
+    font-size:16px;
+    font-weight:900;
+  }
+  .modalHeader .x{
+    cursor:pointer;
+    border:1px solid #2a2a2a;
+    background:#141414;
+    color:#fff;
+    border-radius:10px;
+    padding:8px 10px;
+    font-weight:900;
+  }
+  .modalHeader .x:hover{background:#1b1b1b;}
+
+  .modalControls{
+    padding:14px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .pill{
+    cursor:pointer;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid #2a2a2a;
+    background:#141414;
+    font-weight:800;
+    opacity:.9;
+    user-select:none;
+  }
+  .pill:hover{background:#1b1b1b;}
+  .pill.active{
+    border-color:#2ecc71;
+    box-shadow: 0 0 0 2px rgba(46,204,113,.15) inset;
+  }
+  .modalBody{
+    padding:14px;
+    overflow:auto;
+  }
+  .weaponGrid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:12px;
+  }
+  @media (max-width: 980px){ .weaponGrid{grid-template-columns: repeat(3, 1fr);} }
+  @media (max-width: 700px){ .weaponGrid{grid-template-columns: repeat(2, 1fr);} }
+
+  .wCard{
+    cursor:pointer;
+    border:1px solid #2a2a2a;
+    background:#101010;
+    border-radius:16px;
+    overflow:hidden;
+    transition:.18s;
+    display:flex;
+    flex-direction:column;
+    min-height:160px;
+  }
+  .wCard:hover{
+    transform: translateY(-2px);
+    border-color:#2ecc71;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .wImg{
+    height:110px;
+    width:100%;
+    background:#0f0f0f;
+    object-fit:cover;
+    display:block;
+  }
+  .wInfo{
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .wName{
+    font-weight:900;
+    font-size:13px;
+    line-height:1.2;
+  }
+  .wMetaRow{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid #2a2a2a;
+    background:#141414;
+    opacity:.85;
+  }
+
+  .muted{opacity:.75;}
 </style>
 </head>
 <body>
@@ -211,18 +356,24 @@
     <h3 style="margin-top:0;">Ce vrei să craftezi?</h3>
 
     <div class="field">
-      <label for="weaponSearch">Caută armă:</label>
-      <input id="weaponSearch" type="text" placeholder="ex: pistol, smg, rifle..." />
-    </div>
+      <label>Arma:</label>
 
-    <div class="searchResults" id="searchResults"></div>
+      <!-- ✅ în loc de dropdown direct: buton care deschide modal -->
+      <button class="btn selectWeapon" id="openWeaponModalBtn" type="button">
+        <span class="left">
+          <img id="selectedWeaponImg" alt="" />
+          <span class="title" id="selectedWeaponLabel">-- Selectează arma --</span>
+        </span>
+        <span class="chev">▾</span>
+      </button>
 
-    <div class="field">
-      <label for="weaponSelect">Arma (listă):</label>
-      <select id="weaponSelect">
+      <!-- ✅ dropdown păstrat (ascuns) pentru compatibilitate cu logica -->
+      <select id="weaponSelect" style="display:none;">
         <option value="">-- Selectează arma --</option>
       </select>
     </div>
+
+    <div class="muted">Apasă pe cardul de mai sus ca să alegi din listă cu poze.</div>
   </div>
 
   <!-- STEP 2 -->
@@ -249,8 +400,8 @@
       </div>
 
       <div class="row" style="margin-top:10px;">
-        <button class="btn secondary" id="fullKitBtn">Full kit</button>
-        <button class="btn secondary" id="noKitBtn">No attachments</button>
+        <button class="btn secondary" id="fullKitBtn" type="button">Full kit</button>
+        <button class="btn secondary" id="noKitBtn" type="button">No attachments</button>
       </div>
 
       <div class="attachments" id="attachmentsList"></div>
@@ -268,8 +419,8 @@
       </div>
 
       <div class="row">
-        <button class="btn" id="calcBtn">Calculează</button>
-        <button class="btn secondary" id="addToCartBtn">Adaugă în coș</button>
+        <button class="btn" id="calcBtn" type="button">Calculează</button>
+        <button class="btn secondary" id="addToCartBtn" type="button">Adaugă în coș</button>
       </div>
     </div>
   </div>
@@ -281,8 +432,8 @@
     <div class="row" style="justify-content:space-between;">
       <h3 style="margin:0;">Coș</h3>
       <div class="row">
-        <button class="btn secondary" id="calcCartBtn">Calculează coș</button>
-        <button class="btn danger" id="clearCartBtn">Golește coș</button>
+        <button class="btn secondary" id="calcCartBtn" type="button">Calculează coș</button>
+        <button class="btn danger" id="clearCartBtn" type="button">Golește coș</button>
       </div>
     </div>
     <div style="opacity:.75;">Total cumulat materiale + cost.</div>
@@ -290,6 +441,34 @@
     <div id="cartResult" class="result" style="display:none;"></div>
   </div>
 
+</div>
+
+<!-- =========================
+     MODAL WEAPON PICKER
+========================= -->
+<div class="modalOverlay" id="weaponModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Alege arma">
+    <div class="modalHeader">
+      <div class="title">Alege arma</div>
+      <button class="x" id="closeWeaponModalBtn" type="button">✕</button>
+    </div>
+
+    <div class="modalControls">
+      <input id="modalSearch" type="text" placeholder="Caută armă..." style="flex:1; min-width:240px;"/>
+      <div class="row">
+        <div class="pill active" data-cat="ALL">Toate</div>
+        <div class="pill" data-cat="Pistoale">Pistoale</div>
+        <div class="pill" data-cat="SMG">SMG</div>
+        <div class="pill" data-cat="Rifle">Rifle</div>
+        <div class="pill" data-cat="OFICIALA">OFICIALA</div>
+      </div>
+    </div>
+
+    <div class="modalBody">
+      <div class="weaponGrid" id="weaponGrid"></div>
+      <div class="muted" id="weaponGridEmpty" style="display:none; padding:10px;">Niciun rezultat.</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -309,7 +488,6 @@ for(let b=100;b<=2000;b+=100) BULLET_OPTIONS.push(b);
 
 /* =========================
    AMMO TABLE - EXACT 100/200/250 + interpolare
-   (textul “EXACT în tabel...” e scos din UI, dar logica rămâne)
 ========================= */
 const ammoTable = {
   "PISTOL":                   [{b:100,powder:100,price:5400},{b:200,powder:200,price:10666},{b:250,powder:250,price:13333}],
@@ -463,7 +641,7 @@ const weapons = [
 ];
 
 /* =========================
-   CATEGORII (fără “(Craft)”)
+   CATEGORII
 ========================= */
 function categoryOf(name){
   const pistols = new Set(["PISTOL","COMBAT PISTOL","PISTOL MK2","CERAMIC PISTOL","PISTOL WM29 (XM3)"]);
@@ -476,10 +654,35 @@ function categoryOf(name){
 }
 
 /* =========================
+   IMAGINI (URL-uri)
+   - poți înlocui ulterior cu link-uri reale pentru fiecare armă
+========================= */
+const imgByCategory = {
+  "Pistoale": "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?auto=format&fit=crop&w=900&q=80",
+  "SMG":      "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=900&q=80",
+  "Rifle":    "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?auto=format&fit=crop&w=900&q=80",
+  "OFICIALA": "https://images.unsplash.com/photo-1520975722215-7d9d0f0c1f9d?auto=format&fit=crop&w=900&q=80"
+};
+/* Dacă vrei per-weapon:
+const weaponImages = {
+  "PISTOL": "https://.....",
+  "COMBAT PISTOL": "https://.....",
+  ...
+};
+*/
+const weaponImages = {}; // las gol: folosește fallback pe categorie
+
+function imageForWeapon(name){
+  return weaponImages[name] || imgByCategory[categoryOf(name)] || imgByCategory["OFICIALA"];
+}
+
+/* =========================
    UI Elements
 ========================= */
-const weaponSearch = document.getElementById("weaponSearch");
-const searchResults = document.getElementById("searchResults");
+const openWeaponModalBtn = document.getElementById("openWeaponModalBtn");
+const selectedWeaponLabel = document.getElementById("selectedWeaponLabel");
+const selectedWeaponImg = document.getElementById("selectedWeaponImg");
+
 const weaponSelect = document.getElementById("weaponSelect");
 const bulletsSelect = document.getElementById("bulletsSelect");
 const attachmentsList = document.getElementById("attachmentsList");
@@ -503,6 +706,13 @@ const cartList = document.getElementById("cartList");
 const cartResult = document.getElementById("cartResult");
 const calcCartBtn = document.getElementById("calcCartBtn");
 const clearCartBtn = document.getElementById("clearCartBtn");
+
+const weaponModal = document.getElementById("weaponModal");
+const weaponGrid = document.getElementById("weaponGrid");
+const weaponGridEmpty = document.getElementById("weaponGridEmpty");
+const modalSearch = document.getElementById("modalSearch");
+const closeWeaponModalBtn = document.getElementById("closeWeaponModalBtn");
+const pills = [...document.querySelectorAll(".pill[data-cat]")];
 
 /* =========================
    Helpers
@@ -554,87 +764,15 @@ function getSelectedWeapon(){
 }
 
 /* =========================
-   Build weapon select (FĂRĂ popular/top)
+   Populate hidden select
 ========================= */
-function buildWeaponSelect(filterText=""){
-  const current = weaponSelect.value;
+function buildWeaponSelect(){
   weaponSelect.innerHTML = `<option value="">-- Selectează arma --</option>`;
-  const ft = (filterText||"").trim().toLowerCase();
-
-  const groups=new Map();
   weapons.forEach((w,idx)=>{
-    const label=categoryOf(w.name);
-    if(!groups.has(label)) groups.set(label, []);
-    groups.get(label).push(idx);
-  });
-
-  const order=["Pistoale","SMG","Rifle","OFICIALA"];
-  order.forEach(label=>{
-    const arr=groups.get(label)||[];
-    const og=document.createElement("optgroup");
-    og.label=label;
-    arr.forEach(i=>{
-      const nm=weapons[i].name.toLowerCase();
-      if(ft && !nm.includes(ft)) return;
-      const opt=document.createElement("option");
-      opt.value=String(i);
-      opt.textContent=weapons[i].name;
-      og.appendChild(opt);
-    });
-    if(og.children.length>0) weaponSelect.appendChild(og);
-  });
-
-  if(current!==""){
-    const exists=[...weaponSelect.querySelectorAll("option")].some(o=>o.value===current);
-    weaponSelect.value = exists ? current : "";
-  }
-}
-
-/* =========================
-   Search results (FĂRĂ “folosit x5”)
-========================= */
-function escapeHtml(s){
-  return (s||"").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-function highlight(text, query){
-  const t=escapeHtml(text);
-  const q=(query||"").trim();
-  if(!q) return t;
-  const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig");
-  return t.replace(re, m=>`<mark>${escapeHtml(m)}</mark>`);
-}
-function renderSearchResults(query){
-  const q=(query||"").trim().toLowerCase();
-  let list=weapons.map((w,idx)=>({w,idx}));
-
-  if(q){
-    list=list.filter(x => x.w.name.toLowerCase().includes(q) || categoryOf(x.w.name).toLowerCase().includes(q));
-  }
-  list=list.slice(0,12);
-
-  searchResults.innerHTML="";
-  if(list.length===0){
-    searchResults.innerHTML=`<div class="srItem"><span style="opacity:.75;">Niciun rezultat.</span></div>`;
-    return;
-  }
-
-  list.forEach(({w,idx})=>{
-    const div=document.createElement("div");
-    div.className="srItem";
-    div.innerHTML=`
-      <div class="srLeft">
-        <div><b>${highlight(w.name, query)}</b></div>
-        <div style="opacity:.75;">${escapeHtml(categoryOf(w.name))} • ${w.type==="craft"?"Craft":"OFICIALA"}</div>
-      </div>
-      <div style="opacity:.55;">›</div>
-    `;
-    div.addEventListener("click", ()=>{
-      weaponSelect.value=String(idx);
-      handleWeaponChange();
-    });
-    searchResults.appendChild(div);
+    const opt=document.createElement("option");
+    opt.value=String(idx);
+    opt.textContent=w.name;
+    weaponSelect.appendChild(opt);
   });
 }
 
@@ -650,7 +788,6 @@ function syncNoAttachUI(){
   }else{
     checks.forEach(c=>{c.disabled=false;});
     attachmentsList.style.display="";
-    // dacă arma are atașamente, nu mai afișăm mesajul “nu sunt luate...”
     if(checks.length>0) attachmentsHint.textContent="";
   }
 }
@@ -669,15 +806,28 @@ noKitBtn.addEventListener("click", noKit);
 noAttach.addEventListener("change", syncNoAttachUI);
 
 /* =========================
-   FLOW (default bullets=100, dar UI rămâne ok)
+   FLOW
 ========================= */
+function updateSelectedWeaponCard(w){
+  if(!w){
+    selectedWeaponLabel.textContent="-- Selectează arma --";
+    selectedWeaponImg.src = imgByCategory["OFICIALA"];
+    selectedWeaponImg.alt = "";
+    return;
+  }
+  selectedWeaponLabel.textContent = w.name;
+  selectedWeaponImg.src = imageForWeapon(w.name);
+  selectedWeaponImg.alt = w.name;
+}
+
 function handleWeaponChange(){
   resultDiv.style.display="none";
 
   const w=getSelectedWeapon();
-  if(!w){ resetFlow(); return; }
+  if(!w){ resetFlow(); updateSelectedWeaponCard(null); return; }
 
-  // reset steps
+  updateSelectedWeaponCard(w);
+
   hide(bulletsStep); hide(attachmentsStep); hide(qtyStep);
   attachmentsList.innerHTML="";
   bulletsSelect.innerHTML="";
@@ -685,27 +835,18 @@ function handleWeaponChange(){
   ammoHint.textContent="";
   attachmentsHint.textContent="";
 
-  // bullets
   fillBullets();
   show(bulletsStep);
 
-  // ✅ default 100
+  // default 100
   bulletsSelect.value="100";
-
-  // mici info (opțional) – NU mai afișăm textul “EXACT...”
-  // ammoHint.textContent = "";
-
-  // declanșăm pasul următor automat, dar fără să “strice” afișarea gloanțelor
-  setTimeout(()=>{
-    bulletsSelect.dispatchEvent(new Event("change"));
-  }, 0);
+  setTimeout(()=> bulletsSelect.dispatchEvent(new Event("change")), 0);
 }
 
 function handleBulletsChange(){
   const w=getSelectedWeapon();
   if(!w) return;
 
-  // attachments
   const hasAtt = renderAttachments(w);
   if(hasAtt){
     show(attachmentsStep);
@@ -714,8 +855,6 @@ function handleBulletsChange(){
   }else{
     hide(attachmentsStep);
   }
-
-  // qty
   show(qtyStep);
 }
 
@@ -857,7 +996,7 @@ calcBtn.addEventListener("click", ()=>{
 /* =========================
    CART
 ========================= */
-const CART_KEY="fivem_cart_v1";
+const CART_KEY="fivem_cart_v2";
 let cart=[];
 
 function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
@@ -895,8 +1034,8 @@ function renderCart(){
         <div class="cartMeta">${chips.join("")}</div>
       </div>
       <div class="row" style="margin-top:10px;">
-        <button class="btn secondary" data-act="dup" data-idx="${idx}">Duplică</button>
-        <button class="btn danger" data-act="del" data-idx="${idx}">Șterge</button>
+        <button class="btn secondary" data-act="dup" data-idx="${idx}" type="button">Duplică</button>
+        <button class="btn danger" data-act="del" data-idx="${idx}" type="button">Șterge</button>
       </div>
     `;
     cartList.appendChild(div);
@@ -977,22 +1116,85 @@ calcCartBtn.addEventListener("click", ()=>{
 });
 
 /* =========================
-   SEARCH bind
+   WEAPON MODAL LOGIC
 ========================= */
-weaponSearch.addEventListener("input", (e)=>{
-  const q=e.target.value;
-  buildWeaponSelect(q);
-  renderSearchResults(q);
-  if(weaponSelect.value==="") resetFlow();
+let modalCategory = "ALL";
+
+function openModal(){
+  weaponModal.classList.add("show");
+  modalSearch.value = "";
+  modalCategory = "ALL";
+  pills.forEach(p=>p.classList.toggle("active", p.dataset.cat==="ALL"));
+  renderWeaponGrid();
+  setTimeout(()=> modalSearch.focus(), 20);
+}
+function closeModal(){
+  weaponModal.classList.remove("show");
+}
+
+openWeaponModalBtn.addEventListener("click", openModal);
+closeWeaponModalBtn.addEventListener("click", closeModal);
+weaponModal.addEventListener("click", (e)=>{
+  if(e.target === weaponModal) closeModal();
 });
+window.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && weaponModal.classList.contains("show")) closeModal();
+});
+
+pills.forEach(p=>{
+  p.addEventListener("click", ()=>{
+    modalCategory = p.dataset.cat;
+    pills.forEach(x=>x.classList.toggle("active", x===p));
+    renderWeaponGrid();
+  });
+});
+modalSearch.addEventListener("input", renderWeaponGrid);
+
+function renderWeaponGrid(){
+  const q = (modalSearch.value||"").trim().toLowerCase();
+  weaponGrid.innerHTML = "";
+  let count = 0;
+
+  weapons.forEach((w, idx)=>{
+    const cat = categoryOf(w.name);
+    if(modalCategory !== "ALL" && modalCategory !== cat) return;
+
+    const hay = (w.name + " " + cat).toLowerCase();
+    if(q && !hay.includes(q)) return;
+
+    count++;
+
+    const card=document.createElement("div");
+    card.className="wCard";
+    const img=imageForWeapon(w.name);
+    card.innerHTML=`
+      <img class="wImg" src="${img}" alt="${w.name}">
+      <div class="wInfo">
+        <div class="wName">${w.name}</div>
+        <div class="wMetaRow">
+          <span class="tag">${cat}</span>
+          <span class="tag">${w.type==="craft" ? "Craft" : "OFICIALA"}</span>
+        </div>
+      </div>
+    `;
+    card.addEventListener("click", ()=>{
+      weaponSelect.value = String(idx);
+      weaponSelect.dispatchEvent(new Event("change"));
+      closeModal();
+    });
+    weaponGrid.appendChild(card);
+  });
+
+  weaponGridEmpty.style.display = count===0 ? "block" : "none";
+}
 
 /* =========================
    INIT
 ========================= */
 function init(){
-  buildWeaponSelect("");
-  renderSearchResults("");
+  buildWeaponSelect();
   resetFlow();
+  updateSelectedWeaponCard(null);
   loadCart();
   renderCart();
 }
