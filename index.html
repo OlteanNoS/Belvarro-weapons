@@ -9,8 +9,6 @@
   :root{
     --bg-url: url("https://i.imgur.com/fTp0NnE.png");
     --green:#2ecc71;
-    --panel:#141414;
-    --panel2:#101010;
     --border:#2a2a2a;
     --text:#ffffff;
     --muted: rgba(255,255,255,.75);
@@ -148,6 +146,7 @@
     object-position:center;
     border:1px solid var(--border);
     background:#0f0f0f;
+    image-rendering: auto;
   }
   .btn.selectWeapon .title{
     white-space:nowrap;
@@ -168,7 +167,7 @@
     margin-top:0;
   }
   .step.show{
-    max-height:2200px;
+    max-height:2600px;
     opacity:1;
     transform: translateY(0);
     border-left-color:var(--green);
@@ -326,13 +325,13 @@
     object-position:center;
     display:block;
     cursor:zoom-in;
+    image-rendering:auto;
   }
   .wInfo{padding:10px; display:flex; flex-direction:column; gap:8px; flex:1;}
   .wName{font-weight:900; font-size:13px; line-height:1.2;}
   .wMetaRow{display:flex; gap:6px; flex-wrap:wrap;}
   .tag{font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid var(--border); background:#141414; opacity:.85;}
 
-  /* ✅ buton clar de select */
   .wActions{padding:10px; padding-top:0;}
   .wSelectBtn{
     width:100%;
@@ -407,6 +406,26 @@
     opacity:.45;
     filter:saturate(.6);
   }
+  .matCard.good{
+    border-color: rgba(46,204,113,.65);
+    box-shadow: 0 0 0 2px rgba(46,204,113,.12) inset;
+  }
+  .matCard.missing{
+    border-color: rgba(231,76,60,.65);
+    box-shadow: 0 0 0 2px rgba(231,76,60,.12) inset;
+  }
+
+  .matInput{
+    width:110px;
+    min-width:110px;
+    padding:8px 10px;
+    border-radius:12px;
+    border:1px solid #444;
+    background:#1c1c1c;
+    color:#fff;
+    font-weight:900;
+  }
+  .matInput:focus{outline:none;border-color:var(--green);}
 
   /* Tooltip */
   .tooltip{
@@ -486,7 +505,7 @@
 
   <!-- STEP 1 -->
   <div class="box">
-    <h3 style="margin-top:0;">Ce vrei să craftezi?</h3>
+    <h3 style="margin-top:0;">Alege arma</h3>
 
     <div class="field">
       <label>Arma:</label>
@@ -525,7 +544,7 @@
         <h3 style="margin:0;">Atașamente</h3>
         <label style="opacity:.85;">
           <input type="checkbox" id="noAttach" />
-          Nu vreau atașamente
+          Fără atașamente
         </label>
       </div>
 
@@ -617,7 +636,7 @@
 
 <script>
 /* =========================
-   COSTURI
+   COSTURI materiale (regulile tale)
 ========================= */
 const COST_STEEL = 5000;
 const COST_POLYMER = 150;
@@ -845,7 +864,7 @@ function imageForWeapon(name){
 }
 
 /* =========================
-   UI
+   UI elements
 ========================= */
 const openWeaponModalBtn = document.getElementById("openWeaponModalBtn");
 const selectedWeaponLabel = document.getElementById("selectedWeaponLabel");
@@ -946,7 +965,7 @@ function getSelectedWeapon(){
 }
 
 /* =========================
-   cost
+   cost materiale
 ========================= */
 function estimateMaterialsCost(t){
   let cost=0;
@@ -1016,13 +1035,13 @@ function currentSelectionToObject(){
 }
 
 /* =========================
-   Material card
+   Material cards
 ========================= */
-function matCardHTML(key, value){
+function matCardHTML(key, value, extraClass=""){
   const v = Math.round(value || 0);
   const zero = v===0 ? "zero" : "";
   return `
-    <div class="matCard ${zero}">
+    <div class="matCard ${zero} ${extraClass}">
       <div class="matLeft">
         <img src="${materialIcons[key]||""}" alt="${materialLabels[key]||key}">
         <div class="matName">${materialLabels[key]||key}</div>
@@ -1033,10 +1052,108 @@ function matCardHTML(key, value){
 }
 
 /* =========================
-   RENDER result + (tool) Copy Discord
+   STOCK (stoc + lipsuri)
+========================= */
+const STOCK_KEY="fivem_stock_v2";
+function saveStock(stock){ localStorage.setItem(STOCK_KEY, JSON.stringify(stock)); }
+function loadStock(){
+  try{
+    const raw=localStorage.getItem(STOCK_KEY);
+    const obj=raw ? JSON.parse(raw) : null;
+    if(!obj || typeof obj!=="object") return emptyTotals();
+    const s=emptyTotals();
+    materialOrder.forEach(k=> s[k]=Math.max(0, parseInt(obj[k]||0,10) || 0));
+    return s;
+  }catch(e){
+    return emptyTotals();
+  }
+}
+function readStockFromUI(root){
+  const stock = emptyTotals();
+  root.querySelectorAll("input[data-stock-key]").forEach(inp=>{
+    const k = inp.getAttribute("data-stock-key");
+    const n = Math.max(0, parseInt(inp.value||"0",10));
+    stock[k]=n;
+  });
+  return stock;
+}
+function stockInputsHTML(values){
+  return `
+    <div class="matGrid">
+      ${materialOrder.map(k=>{
+        const v = Math.max(0, Math.round(values[k]||0));
+        return `
+          <div class="matCard">
+            <div class="matLeft">
+              <img src="${materialIcons[k]||""}" alt="${materialLabels[k]||k}">
+              <div class="matName">${materialLabels[k]||k}</div>
+            </div>
+            <input class="matInput" inputmode="numeric" type="number" min="0"
+                   value="${v}" data-stock-key="${k}">
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+function computeMissing(need, have){
+  const miss = emptyTotals();
+  materialOrder.forEach(k=>{
+    miss[k] = Math.max(0, Math.round((need[k]||0) - (have[k]||0)));
+  });
+  return miss;
+}
+function renderMissingGrid(miss, have, need){
+  return `
+    <div class="matGrid">
+      ${materialOrder.map(k=>{
+        const n = Math.round(need[k]||0);
+        const h = Math.round(have[k]||0);
+        const m = Math.round(miss[k]||0);
+        const cls = (n===0) ? "zero" : (m>0 ? "missing" : "good");
+        return `
+          <div class="matCard ${cls}">
+            <div class="matLeft">
+              <img src="${materialIcons[k]||""}" alt="${materialLabels[k]||k}">
+              <div class="matName">${materialLabels[k]||k}</div>
+            </div>
+            <div class="matBadge">${m}</div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+/* =========================
+   COST lipsuri (include praful corect)
+   - cost materiale lipsă = regula ta
+   - cost praf lipsă = costAmmo * (missingPowder/needPowder)
+========================= */
+function missingAmmoCost(costAmmoTotal, needPowder, missingPowder){
+  const need = Math.max(0, Number(needPowder||0));
+  const miss = Math.max(0, Number(missingPowder||0));
+  if(need <= 0 || costAmmoTotal <= 0) return 0;
+  const ratio = Math.min(1, miss / need);
+  return Math.round(costAmmoTotal * ratio);
+}
+
+/* =========================
+   RENDER result (cu stoc + lipsuri)
 ========================= */
 function renderResult(out, isPreview){
   resultDiv.style.display="block";
+
+  const stockSaved = loadStock();
+  const need = out.grandTotals;
+  const miss = computeMissing(need, stockSaved);
+
+  const costNeedMats = Math.round(estimateMaterialsCost(need));
+  const costNeedAmmo = Math.round(out.costAmmo);
+
+  const costMissMats = Math.round(estimateMaterialsCost(miss));
+  const costMissAmmo = missingAmmoCost(out.costAmmo, need.powder, miss.powder);
+  const costMissAll = Math.round(costMissMats + costMissAmmo);
 
   resultDiv.innerHTML=`
     <h3>${isPreview ? "Preview" : "Rezultat"}</h3>
@@ -1064,7 +1181,7 @@ function renderResult(out, isPreview){
         <div style="font-size:22px;font-weight:900;">${out.total.toLocaleString()}$</div>
         <hr>
         <div><b>Cost armă:</b> ${Math.round(out.costWeapon).toLocaleString()}$</div>
-        <div><b>Cost gloanțe:</b> ${Math.round(out.costAmmo).toLocaleString()}$</div>
+        <div><b>Cost gloanțe:</b> ${costNeedAmmo.toLocaleString()}$</div>
         <div><b>Cost materiale:</b> ${Math.round(out.costMats).toLocaleString()}$</div>
         <hr>
         <button class="btn secondary" id="copyDiscordBtn" type="button">Copiază (Discord)</button>
@@ -1073,10 +1190,63 @@ function renderResult(out, isPreview){
 
     <hr>
 
-    <div class="box">
-      <h3 style="margin-top:0;">Materiale (Total)</h3>
-      <div class="matGrid">
-        ${materialOrder.map(k=>matCardHTML(k, out.grandTotals[k])).join("")}
+    <div class="grid">
+      <div class="box">
+        <h3 style="margin-top:0;">Materiale (Total)</h3>
+        <div class="matGrid">
+          ${materialOrder.map(k=>matCardHTML(k, need[k])).join("")}
+        </div>
+      </div>
+
+      <div class="box">
+        <h3 style="margin-top:0;">Stoc</h3>
+        <div id="stockInputsWrap">${stockInputsHTML(stockSaved)}</div>
+
+        <hr>
+
+        <h3 style="margin-top:0;">Îți lipsesc</h3>
+        <div id="missingGridWrap">${renderMissingGrid(miss, stockSaved, need)}</div>
+
+        <div class="muted" style="margin-top:10px;">
+          <b>Cost lipsuri:</b> <span id="missingCost">${costMissAll.toLocaleString()}$</span>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="grid">
+      <div class="box">
+        <h3 style="margin-top:0;">Separat</h3>
+        <hr>
+        <div><b>Armă:</b>
+          Oțel ${Math.round(out.baseTotals.steel||0)},
+          Șuruburi ${Math.round(out.baseTotals.screw||0)},
+          Țeavă ${Math.round(out.baseTotals.barrel||0)},
+          Arc ${Math.round(out.baseTotals.spring||0)},
+          Lemn ${Math.round(out.baseTotals.wood||0)},
+          Polimer ${Math.round(out.baseTotals.polymer||0)}
+        </div>
+        <hr>
+        <div><b>Atașamente:</b>
+          Oțel ${Math.round(out.attTotals.steel||0)},
+          Șuruburi ${Math.round(out.attTotals.screw||0)},
+          Țeavă ${Math.round(out.attTotals.barrel||0)},
+          Arc ${Math.round(out.attTotals.spring||0)},
+          Lemn ${Math.round(out.attTotals.wood||0)},
+          Polimer ${Math.round(out.attTotals.polymer||0)},
+          Bec ${Math.round(out.attTotals.bec||0)},
+          Lupă ${Math.round(out.attTotals.lupa||0)}
+        </div>
+        <hr>
+        <div><b>Gloanțe:</b> Praf ${Math.round(out.ammoTotals.powder||0)}</div>
+      </div>
+
+      <div class="box">
+        <h3 style="margin-top:0;">Acțiuni</h3>
+        <div class="row">
+          <button class="btn secondary" id="resetStockBtn" type="button">Reset stoc</button>
+        </div>
       </div>
     </div>
   `;
@@ -1087,19 +1257,66 @@ function renderResult(out, isPreview){
     resImg.addEventListener("click", ()=> openLightbox(out.w.name, imageForWeapon(out.w.name)));
   }
 
+  // stoc live + persist + update lipsuri (include praf)
+  const stockWrap = document.getElementById("stockInputsWrap");
+  const missWrap = document.getElementById("missingGridWrap");
+  const missCostEl = document.getElementById("missingCost");
+
+  stockWrap.querySelectorAll("input[data-stock-key]").forEach(inp=>{
+    inp.addEventListener("input", ()=>{
+      if(parseInt(inp.value||"0",10)<0) inp.value="0";
+      const currentStock = readStockFromUI(stockWrap);
+      saveStock(currentStock);
+
+      const missNow = computeMissing(need, currentStock);
+      missWrap.innerHTML = renderMissingGrid(missNow, currentStock, need);
+
+      const costMissNowMats = Math.round(estimateMaterialsCost(missNow));
+      const costMissNowAmmo = missingAmmoCost(out.costAmmo, need.powder, missNow.powder);
+      const costMissNowAll  = Math.round(costMissNowMats + costMissNowAmmo);
+
+      missCostEl.textContent = costMissNowAll.toLocaleString() + "$";
+    });
+  });
+
   // copy discord
   const copyBtn = document.getElementById("copyDiscordBtn");
   if(copyBtn){
     copyBtn.addEventListener("click", ()=>{
+      const stockNow = readStockFromUI(stockWrap);
+      const missNow = computeMissing(need, stockNow);
+
       const lines = [];
       lines.push(`**${out.w.name}** x${out.qty} • **${out.bullets} gl**`);
       lines.push(`Total: **${out.total.toLocaleString()}$**`);
       lines.push(`—`);
+      lines.push(`**Necesare:**`);
       materialOrder.forEach(k=>{
-        const v = Math.round(out.grandTotals[k]||0);
+        const v = Math.round(need[k]||0);
         if(v>0) lines.push(`• ${materialLabels[k]}: **${v}**`);
       });
+      lines.push(`—`);
+      lines.push(`**Îți lipsesc:**`);
+      materialOrder.forEach(k=>{
+        const v = Math.round(missNow[k]||0);
+        if(v>0) lines.push(`• ${materialLabels[k]}: **${v}**`);
+      });
+
+      const costMissNowMats = Math.round(estimateMaterialsCost(missNow));
+      const costMissNowAmmo = missingAmmoCost(out.costAmmo, need.powder, missNow.powder);
+      const costMissNowAll  = Math.round(costMissNowMats + costMissNowAmmo);
+      lines.push(`Cost lipsuri: **${costMissNowAll.toLocaleString()}$**`);
+
       navigator.clipboard?.writeText(lines.join("\n"));
+    });
+  }
+
+  // reset stoc
+  const resetStockBtn = document.getElementById("resetStockBtn");
+  if(resetStockBtn){
+    resetStockBtn.addEventListener("click", ()=>{
+      saveStock(emptyTotals());
+      renderResult(out, isPreview);
     });
   }
 }
@@ -1143,7 +1360,7 @@ function syncNoAttachUI(){
   if(noAttach.checked){
     checks.forEach(c=>{c.checked=false; c.disabled=true;});
     attachmentsList.style.display="none";
-    attachmentsHint.textContent="Atașamentele NU sunt luate în calcul.";
+    attachmentsHint.textContent="";
   }else{
     checks.forEach(c=>{c.disabled=false;});
     attachmentsList.style.display="";
@@ -1203,7 +1420,7 @@ function handleBulletsChange(){
 
   const b = parseInt(bulletsSelect.value || "100", 10);
   const am = ammoExactInterpolated(w.name, b);
-  ammoHint.textContent = `Praf: ${Math.round(am.powder)} • Cost gloanțe: ${Math.round(am.price).toLocaleString()}$`;
+  ammoHint.textContent = `Praf: ${Math.round(am.powder)} • Cost: ${Math.round(am.price).toLocaleString()}$`;
 
   renderAttachments(w);
   show(qtyStep);
@@ -1435,8 +1652,6 @@ window.addEventListener("keydown",(e)=>{
 
 /* =========================
    Weapon grid rendering
-   ✅ BUTON SELECTEAZĂ
-   ✅ Filtru OFICIALA corect
 ========================= */
 function selectWeaponByIndex(idx){
   weaponSelect.value = String(idx);
@@ -1452,7 +1667,6 @@ function renderWeaponGrid(){
   weapons.forEach((w, idx)=>{
     const cat = categoryOf(w.name);
 
-    // ✅ filtre:
     if(modalCategory !== "ALL"){
       if(modalCategory === "OFICIALA"){
         if(w.type !== "money") return;
@@ -1484,19 +1698,16 @@ function renderWeaponGrid(){
       </div>
     `;
 
-    // imagine = zoom
     card.querySelector("img[data-zoom]").addEventListener("click", (e)=>{
       e.stopPropagation();
       openLightbox(w.name, img);
     });
 
-    // buton select
     card.querySelector("button[data-select]").addEventListener("click", (e)=>{
       e.stopPropagation();
       selectWeaponByIndex(idx);
     });
 
-    // hover tooltip
     card.addEventListener("mouseenter", (ev)=>{
       tooltipForWeapon(w);
       showTooltipAt(ev.clientX, ev.clientY);
@@ -1516,6 +1727,100 @@ function renderWeaponGrid(){
 
 /* =========================
    INIT
+========================= */
+function buildWeaponSelect(){
+  weaponSelect.innerHTML = `<option value="">-- Selectează arma --</option>`;
+  weapons.forEach((w,idx)=>{
+    const opt=document.createElement("option");
+    opt.value=String(idx);
+    opt.textContent=w.name;
+    weaponSelect.appendChild(opt);
+  });
+}
+
+function updateSelectedWeaponCard(w){
+  if(!w){
+    selectedWeaponLabel.textContent="-- Selectează arma --";
+    selectedWeaponImg.src = "http://assetsarena.fplayt.ro/images/weapons/Pistol.webp";
+    selectedWeaponImg.alt = "";
+    return;
+  }
+  selectedWeaponLabel.textContent = w.name;
+  selectedWeaponImg.src = imageForWeapon(w.name);
+  selectedWeaponImg.alt = w.name;
+}
+
+function handleWeaponChange(){
+  resultDiv.style.display="none";
+
+  const w=getSelectedWeapon();
+  if(!w){ resetFlow(); updateSelectedWeaponCard(null); return; }
+
+  updateSelectedWeaponCard(w);
+
+  hide(bulletsStep); hide(attachmentsStep); hide(qtyStep);
+  attachmentsList.innerHTML="";
+  bulletsSelect.innerHTML="";
+  noAttach.checked=false;
+  ammoHint.textContent="";
+  attachmentsHint.textContent="";
+
+  fillBullets();
+  show(bulletsStep);
+
+  bulletsSelect.value="100";
+  setTimeout(()=> bulletsSelect.dispatchEvent(new Event("change")), 0);
+}
+
+function handleBulletsChange(){
+  const w=getSelectedWeapon();
+  if(!w) return;
+
+  const b = parseInt(bulletsSelect.value || "100", 10);
+  const am = ammoExactInterpolated(w.name, b);
+  ammoHint.textContent = `Praf: ${Math.round(am.powder)} • Cost: ${Math.round(am.price).toLocaleString()}$`;
+
+  renderAttachments(w);
+  show(qtyStep);
+
+  updateLivePreview();
+}
+
+weaponSelect.addEventListener("change", handleWeaponChange);
+bulletsSelect.addEventListener("change", handleBulletsChange);
+
+selectedWeaponImg.addEventListener("click", ()=>{
+  const w=getSelectedWeapon();
+  if(!w) return;
+  openLightbox(w.name, imageForWeapon(w.name));
+});
+
+/* =========================
+   Modal open/close
+========================= */
+function openModal(){
+  weaponModal.classList.add("show");
+  modalSearch.value = "";
+  modalCategory = "ALL";
+  pills.forEach(p=>p.classList.toggle("active", p.dataset.cat==="ALL"));
+  renderWeaponGrid();
+  setTimeout(()=> modalSearch.focus(), 20);
+}
+function closeModal(){
+  weaponModal.classList.remove("show");
+  hideTooltip();
+}
+openWeaponModalBtn.addEventListener("click", openModal);
+closeWeaponModalBtn.addEventListener("click", closeModal);
+weaponModal.addEventListener("click", (e)=>{
+  if(e.target === weaponModal) closeModal();
+});
+window.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && weaponModal.classList.contains("show")) closeModal();
+});
+
+/* =========================
+   Cart init
 ========================= */
 function init(){
   buildWeaponSelect();
